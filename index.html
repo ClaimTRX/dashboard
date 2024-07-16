@@ -6,7 +6,7 @@
   <title>Dashboard</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="https://raw.githubusercontent.com/ClaimTRX/dashboard/style.css">
+  <link rel="stylesheet" href="https://raw.githubusercontent.com/ClaimTRX/dashboard/main/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -63,7 +63,7 @@
       // Fetch and display claimable staking rewards
       const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
       const contract = await tronWeb.contract().at(contractAddress);
-      const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
+      const claimableRewards = await contract.methods.claimableRewards(userAddress).call();
       document.getElementById('claimable-rewards').innerText = tronWeb.fromSun(claimableRewards) + ' TRX';
 
       // Claim rewards button
