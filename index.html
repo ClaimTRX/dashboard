@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
+  <title>CFT</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
@@ -68,35 +68,19 @@
       font-size: 1rem;
       padding: 10px 20px;
     }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        height: auto;
-        width: 100%;
-        text-align: center;
-      }
-
-      .topbar {
-        text-align: center;
-      }
-
-      .container {
-        margin-top: 20px;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="d-flex flex-column flex-md-row">
+  <div class="d-flex">
     <div class="sidebar">
-      <h2>Maxton</h2>
+      <h2>CFT</h2>
       <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
       <a href="#"><i class="fas fa-user"></i> Profile</a>
       <a href="#"><i class="fas fa-cog"></i> Settings</a>
     </div>
     <div class="flex-grow-1">
       <div class="topbar">
-        <button id="connect-wallet-button" onclick="connectWallet()">Connect Wallet</button>
+        <button id="connect-button" onclick="connectWallet()">Connect Wallet</button>
       </div>
       <div class="container">
         <h1>Welcome to the Dashboard</h1>
@@ -115,65 +99,55 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
   <script>
-    function formatNumber(number) {
-      return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
-      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-        await initializeTronWeb();
-      } else {
-        setTimeout(checkTronWeb, 1000);
-      }
+      await initializeTronWeb();
     });
 
-    function checkTronWeb() {
-      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-        initializeTronWeb();
-      } else {
-        setTimeout(checkTronWeb, 1000);
-      }
-    }
-
     async function initializeTronWeb() {
-      const tronWeb = window.tronWeb;
-      const userAddress = tronWeb.defaultAddress.base58;
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+        const tronWeb = window.tronWeb;
+        const userAddress = tronWeb.defaultAddress.base58;
 
-      console.log('Connected to TronLink.');
-      console.log('User Address:', userAddress);
+        document.getElementById('connect-button').innerText = 'Connected';
+        document.getElementById('connect-button').disabled = true;
 
-      const balance = await tronWeb.trx.getBalance(userAddress);
-      console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
-      document.getElementById('tron-status').style.display = 'none';
-      document.getElementById('connect-wallet-button').innerText = 'Connected';
+        console.log('Connected to TronLink.');
+        console.log('User Address:', userAddress);
 
-      await updateClaimableRewards(tronWeb, userAddress);
+        const balance = await tronWeb.trx.getBalance(userAddress);
+        console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-      document.getElementById('claim-rewards-button').addEventListener('click', async () => {
-        try {
-          const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-          const contract = await tronWeb.contract().at(contractAddress);
-          const transaction = await contract.methods.claimReward().send();
-          console.log('Transaction:', transaction);
+        // Fetch and display claimable staking rewards
+        const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+        const contract = await tronWeb.contract().at(contractAddress);
+        const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
+        document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
 
-          await updateClaimableRewards(tronWeb, userAddress);
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      });
-    }
-
-    async function updateClaimableRewards(tronWeb, userAddress) {
-      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-      const contract = await tronWeb.contract().at(contractAddress);
-      const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
-      document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
+        // Claim rewards button
+        document.getElementById('claim-rewards-button').addEventListener('click', async () => {
+          try {
+            await contract.methods.claimReward().send();
+            const newClaimableRewards = await contract.methods.viewPendingReward(userAddress).call();
+            document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(newClaimableRewards)) + ' TRX';
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        });
+      } else {
+        console.log('Please install TronLink.');
+      }
     }
 
     async function connectWallet() {
       if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
         await initializeTronWeb();
+      } else {
+        console.log('Please install TronLink extension in your browser.');
       }
+    }
+
+    function formatNumber(num) {
+      return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
   </script>
 </body>
