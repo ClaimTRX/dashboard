@@ -92,6 +92,15 @@
             <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
           </div>
         </div>
+        <!-- Staked Tokens and Available CFT -->
+        <div class="card mt-4">
+          <div class="card-body">
+            <h5 class="card-title">Staked Tokens and Available CFT</h5>
+            <p class="card-text" id="staked-tokens">Loading...</p>
+            <p class="card-text" id="available-cft">Loading...</p>
+            <button id="stake-button" class="btn btn-success">Stake</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -100,55 +109,73 @@
   <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      if (await checkTronLinkInstalled()) {
-        await initializeTronWeb();
-      }
+      await initializeTronWeb();
     });
 
-    async function checkTronLinkInstalled() {
-      return new Promise((resolve) => {
-        const interval = setInterval(() => {
-          if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-            clearInterval(interval);
-            resolve(true);
-          }
-        }, 1000);
-      });
-    }
-
     async function initializeTronWeb() {
-      const tronWeb = window.tronWeb;
-      const userAddress = tronWeb.defaultAddress.base58;
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+        const tronWeb = window.tronWeb;
+        const userAddress = tronWeb.defaultAddress.base58;
 
-      document.getElementById('connect-button').innerText = 'Connected';
-      document.getElementById('connect-button').disabled = true;
+        document.getElementById('connect-button').innerText = 'Connected';
+        document.getElementById('connect-button').disabled = true;
 
-      console.log('Connected to TronLink.');
-      console.log('User Address:', userAddress);
+        console.log('Connected to TronLink.');
+        console.log('User Address:', userAddress);
 
-      const balance = await tronWeb.trx.getBalance(userAddress);
-      console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
+        const balance = await tronWeb.trx.getBalance(userAddress);
+        console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-      // Fetch and display claimable staking rewards
-      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-      const contract = await tronWeb.contract().at(contractAddress);
-      const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
-      document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
+        // Fetch and display claimable staking rewards
+        const stakingContractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+        const cftContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
+        const stakingContract = await tronWeb.contract().at(stakingContractAddress);
+        const cftContract = await tronWeb.contract().at(cftContractAddress);
+        const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
+        document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
 
-      // Claim rewards button
-      document.getElementById('claim-rewards-button').addEventListener('click', async () => {
-        try {
-          await contract.methods.claimReward().send();
-          const newClaimableRewards = await contract.methods.viewPendingReward(userAddress).call();
-          document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(newClaimableRewards)) + ' TRX';
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      });
+        const stakedTokens = await stakingContract.methods.viewStakedAmount(userAddress).call();
+        document.getElementById('staked-tokens').innerText = 'Staked Tokens: ' + formatNumber(tronWeb.fromSun(stakedTokens)) + ' CFT';
+
+        const cftBalance = await cftContract.methods.balanceOf(userAddress).call();
+        document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(cftBalance)) + ' CFT';
+
+        // Claim rewards button
+        document.getElementById('claim-rewards-button').addEventListener('click', async () => {
+          try {
+            await stakingContract.methods.claimReward().send();
+            const newClaimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
+            document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(newClaimableRewards)) + ' TRX';
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        });
+
+        // Stake button
+        document.getElementById('stake-button').addEventListener('click', async () => {
+          try {
+            const allowance = await cftContract.methods.allowance(userAddress, stakingContractAddress).call();
+            const maxAllowance = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+            if (allowance.toString() === '0') {
+              await cftContract.methods.approve(stakingContractAddress, maxAllowance).send();
+              console.log('Token approved for staking.');
+            }
+
+            await stakingContract.methods.stake().send();
+            const newStakedTokens = await stakingContract.methods.viewStakedAmount(userAddress).call();
+            document.getElementById('staked-tokens').innerText = 'Staked Tokens: ' + formatNumber(tronWeb.fromSun(newStakedTokens)) + ' CFT';
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        });
+      } else {
+        console.log('Please install TronLink.');
+      }
     }
 
     async function connectWallet() {
-      if (await checkTronLinkInstalled()) {
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
         await initializeTronWeb();
       } else {
         console.log('Please install TronLink extension in your browser.');
@@ -161,4 +188,3 @@
   </script>
 </body>
 </html>
-
