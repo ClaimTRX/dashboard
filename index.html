@@ -163,13 +163,12 @@
       <div class="card-body">
         <h5 class="card-title">Claimable Staking Rewards</h5>
         <p class="card-text" id="claimable-rewards">Loading...</p>
-       
+        <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
+        <button id="compound-button" class="btn btn-success">Compound Rewards</button>
         <h5 class="card-title mt-3">Current APR</h5>
         <p class="card-text" id="current-apr">Loading...</p>
         <h5 class="card-title mt-3">Staked Amount</h5>
         <p class="card-text" id="staked-amount">Loading...</p>
-         <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button><br>
-        <button id="compound-button" class="btn btn-success">Compound Rewards</button>
       </div>
     </div>
     <!-- Stake/Unstake Box -->
@@ -178,7 +177,7 @@
         <h5 class="card-title">Stake/Unstake CFT</h5>
         <p class="card-text" id="available-cft">Loading...</p>
         <input type="number" id="stake-amount" class="form-control" placeholder="Enter amount to stake">
-        <button id="stake-button" class="btn btn-success">Stake</button><br>
+        <button id="stake-button" class="btn btn-success">Stake</button>
         <button id="unstake-button" class="btn btn-danger">Unstake</button>
       </div>
     </div>
@@ -880,12 +879,8 @@
         document.getElementById('connect-button').innerText = 'Connected';
         document.getElementById('connect-button').disabled = true;
 
-        console.log('Connected to TronLink.');
-        console.log('User Address:', userAddress);
-
         try {
             const balance = await tronWeb.trx.getBalance(userAddress);
-            console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
             stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
             tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
@@ -1003,7 +998,7 @@
     }
 
     async function unstakeTokens() {
-        const unstakeAmount = document.getElementById('stake-amount').value; // or another element for the unstake amount if different
+        const unstakeAmount = document.getElementById('stake-amount').value;
         await stakingContract.methods.withdraw(tronWeb.toSun(unstakeAmount)).send();
         const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
         document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
@@ -1032,6 +1027,24 @@
         await buyCftContract.methods.buyTokens().send({
             callValue: claimableRewards
         });
+
+        // Check the new balance of tokens before and after buy
+        const initialCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
+
+        // Calculate the newly bought tokens
+        const finalCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
+        const newlyBoughtCFT = finalCFTBalance - initialCFTBalance;
+
+        // Approve tokens for staking if necessary
+        const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
+        const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+        if (allowance < newlyBoughtCFT) {
+            await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
+        }
+
+        // Stake the new tokens
+        await stakingContract.methods.stake(newlyBoughtCFT).send();
 
         // Update the UI
         setTimeout(refreshUI, 3000);
