@@ -170,14 +170,15 @@
   <div class="card-body">
     <h5 class="card-title">Claimable Staking Rewards</h5>
     <p class="card-text" id="claimable-rewards">Loading...</p>
+    <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
+    <button id="compound-button" class="btn btn-success">Compound Rewards</button>
     <h5 class="card-title mt-3">Current APR</h5>
     <p class="card-text" id="current-apr">Loading...</p>
     <h5 class="card-title mt-3">Staked Amount</h5>
     <p class="card-text" id="staked-amount">Loading...</p>
-    <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
-    <button id="compound-button" class="btn btn-warning">Compound Rewards</button>
   </div>
 </div>
+
 
           <!-- Stake/Unstake Box -->
           <div class="card mt-4">
@@ -1042,6 +1043,12 @@
         await buyCftContract.methods.buyTokens().send({
             callValue: claimableRewards
         });
+
+        // Check the new balance of tokens
+        const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
+
+        // Stake the new tokens
+        await stakingContract.methods.stake(availableCFT).send();
 
         // Update the UI
         setTimeout(refreshUI, 3000);
