@@ -909,29 +909,27 @@
     }
 
     async function updateUI(balance) {
-        try {
-            const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
-            document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
+    try {
+        const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
+        document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
 
-            const currentAPR = await stakingContract.methods.viewAPR().call();
-            document.getElementById('current-apr').innerText = formatAPR(currentAPR) + ' %';
+        const currentAPR = await stakingContract.methods.viewAPR().call();
+        document.getElementById('current-apr').innerText = formatAPR(currentAPR) + ' %';
 
-            const stakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
-            document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
+        const stakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
+        document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
 
-            const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
-            document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
+        const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
+        document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
 
-            document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(balance)) + ' TRX';
+        document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(balance)) + ' TRX';
 
-            setupEventListeners();
-        } catch (error) {
-            console.error('Error updating UI:', error);
-        }
+        setupEventListeners();
+    } catch (error) {
+        console.error('Error updating UI:', error);
     }
-    function formatAPR(apr) {
-    return (parseFloat(apr) / 10000).toFixed(2);
 }
+
 
     function setupEventListeners() {
         document.getElementById('stake-button').addEventListener('click', async () => {
