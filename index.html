@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: #1a1a2e;
+      color: #fff;
+    }
+    .sidebar {
+      height: 100vh;
+      background-color: #162447;
+      padding: 15px;
+    }
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+      padding: 10px 0;
+    }
+    .sidebar a:hover {
+      background-color: #1f4068;
+    }
+    .topbar {
+      background-color: #162447;
+      padding: 10px;
+      text-align: right;
+    }
+    .topbar button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <div class="sidebar">
+      <h2>Maxton</h2>
+      <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="#"><i class="fas fa-user"></i> Profile</a>
+      <a href="#"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+    <div class="flex-grow-1">
+      <div class="topbar">
+        <button onclick="connectWallet()">Connect Wallet</button>
+      </div>
+      <div class="container">
+        <h1>Welcome to the Dashboard</h1>
+        <div id="tron-status">Connecting to TronLink...</div>
+        <!-- Your dashboard content goes here -->
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+        console.log('TronLink is installed and connected.');
+        await initializeTronWeb();
+      } else {
+        console.log('Please install TronLink.');
+        alert('Please install TronLink extension in your browser.');
+      }
+    });
+
+    async function initializeTronWeb() {
+      const tronWeb = window.tronWeb;
+      const userAddress = tronWeb.defaultAddress.base58;
+
+      console.log('Connected to TronLink.');
+      console.log('User Address:', userAddress);
+
+      const balance = await tronWeb.trx.getBalance(userAddress);
+      console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
+      document.getElementById('tron-status').innerText = 'Connected to TronLink';
+    }
+
+    async function connectWallet() {
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+        await initializeTronWeb();
+      } else {
+        alert('Please install TronLink extension in your browser.');
+      }
+    }
+  </script>
+</body>
+</html>
