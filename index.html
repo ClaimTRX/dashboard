@@ -949,7 +949,7 @@
             if (stakeAmount) {
                 try {
                     await stakeTokens(stakeAmount);
-                    await refreshUI();
+                    setTimeout(refreshUI, 3000);
                 } catch (error) {
                     console.error('Error staking tokens:', error);
                 }
@@ -959,7 +959,7 @@
         document.getElementById('unstake-button').addEventListener('click', async () => {
             try {
                 await unstakeTokens();
-                await refreshUI();
+                setTimeout(refreshUI, 3000);
             } catch (error) {
                 console.error('Error unstaking tokens:', error);
             }
@@ -968,7 +968,7 @@
         document.getElementById('claim-rewards-button').addEventListener('click', async () => {
             try {
                 await claimRewards();
-                await refreshUI();
+                setTimeout(refreshUI, 3000);
             } catch (error) {
                 console.error('Error claiming rewards:', error);
             }
@@ -979,7 +979,7 @@
             if (buyAmount) {
                 try {
                     await buyTokens(buyAmount);
-                    await refreshUI();
+                    setTimeout(refreshUI, 3000);
                 } catch (error) {
                     console.error('Error buying tokens:', error);
                 }
