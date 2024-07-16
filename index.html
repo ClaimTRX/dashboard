@@ -962,10 +962,17 @@
     }
 
     async function buyTokens(amount) {
-        await tronWeb.trx.sendTransaction(buyCftContractAddress, tronWeb.toSun(amount)); // Send TRX to buy contract
+    try {
+        await buyCftContract.methods.buyTokens().send({
+            callValue: tronWeb.toSun(amount)
+        });
         const newBalance = await tronWeb.trx.getBalance(userAddress);
         document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(newBalance)) + ' TRX';
+    } catch (error) {
+        console.error('Error buying tokens:', error);
     }
+}
+
 
     async function connectWallet() {
         if (await checkTronLinkInstalled()) {
