@@ -950,10 +950,16 @@
     }
 
     async function unstakeTokens() {
-        await stakingContract.methods.unstake().send();
+    try {
+        const unstakeAmount = document.getElementById('stake-amount').value; // or another element for the unstake amount if different
+        await stakingContract.methods.withdraw(tronWeb.toSun(unstakeAmount)).send();
         const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
         document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
+    } catch (error) {
+        console.error('Error unstaking tokens:', error);
     }
+}
+
 
     async function claimRewards() {
         await stakingContract.methods.claimReward().send();
