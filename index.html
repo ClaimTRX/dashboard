@@ -89,14 +89,14 @@
 <body>
   <div class="d-flex flex-column flex-md-row">
     <div class="sidebar">
-      <h2>Maxton</h2>
+      <h2>CFT</h2>
       <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
       <a href="#"><i class="fas fa-user"></i> Profile</a>
       <a href="#"><i class="fas fa-cog"></i> Settings</a>
     </div>
     <div class="flex-grow-1">
       <div class="topbar">
-        <button onclick="connectWallet()">Connect Wallet</button>
+        <button id="connect-wallet-button" onclick="connectWallet()">Connect Wallet</button>
       </div>
       <div class="container">
         <h1>Welcome to the Dashboard</h1>
@@ -121,12 +121,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-        console.log('TronLink is installed and connected.');
-        await initializeTronWeb();
-      } else {
-        console.log('Please install TronLink.');
-      }
+      await connectWallet();
     });
 
     async function initializeTronWeb() {
@@ -139,6 +134,9 @@
       const balance = await tronWeb.trx.getBalance(userAddress);
       console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
       document.getElementById('tron-status').innerText = 'Connected to TronLink';
+
+      // Update button text
+      document.getElementById('connect-wallet-button').innerText = 'Connected';
 
       // Fetch and display claimable staking rewards
       await updateClaimableRewards(tronWeb, userAddress);
