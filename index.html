@@ -123,7 +123,7 @@
         align-items: flex-start;
       }
 
-      .card-text {
+      .card-text-section {
         flex: 1;
         margin-right: 20px;
       }
@@ -195,12 +195,12 @@
         <div class="card-text-section">
           <h5 class="card-title">Claimable Staking Rewards</h5>
           <p class="card-text" id="claimable-rewards">Loading...</p>
+          <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
+          <button id="compound-button" class="btn btn-success">Compound Rewards</button>
           <h5 class="card-title mt-3">Current APR</h5>
           <p class="card-text" id="current-apr">Loading...</p>
           <h5 class="card-title mt-3">Staked Amount</h5>
           <p class="card-text" id="staked-amount">Loading...</p>
-          <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button><br>
-          <button id="compound-button" class="btn btn-success">Compound Rewards</button>
         </div>
         <div class="card-explanation">
           <p>This card shows your claimable staking rewards, the current annual percentage rate (APR), and the amount of tokens you have staked. You can claim your rewards or compound them to buy more tokens and stake them automatically.</p>
@@ -214,7 +214,7 @@
           <h5 class="card-title">Stake/Unstake CFT</h5>
           <p class="card-text" id="available-cft">Loading...</p>
           <input type="number" id="stake-amount" class="form-control" placeholder="Enter amount to stake">
-          <button id="stake-button" class="btn btn-success">Stake</button><br>
+          <button id="stake-button" class="btn btn-success">Stake</button>
           <button id="unstake-button" class="btn btn-danger">Unstake</button>
         </div>
         <div class="card-explanation">
