@@ -60,6 +60,8 @@
       border-radius: 10px;
       margin-bottom: 20px;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
     }
 
     .card-title {
@@ -94,6 +96,23 @@
       font-size: 0.875rem;
       border-radius: 5px;
       margin-bottom: 10px;
+    }
+
+    .card-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .card-text {
+      margin-right: 20px;
+      flex: 1;
+    }
+
+    .card-explanation {
+      flex: 1;
+      margin-top: 10px;
     }
 
     input[type=number] {
@@ -142,6 +161,14 @@
         padding: 6px;
         width: 100%; /* Adjust width for mobile */
       }
+
+      .card-body {
+        flex-direction: column;
+      }
+
+      .card-explanation {
+        margin-top: 20px;
+      }
     }
   </style>
 </head>
@@ -161,34 +188,49 @@
     <!-- Reward Box -->
     <div class="card mt-4">
       <div class="card-body">
-        <h5 class="card-title">Claimable Staking Rewards</h5>
-        <p class="card-text" id="claimable-rewards">Loading...</p>
-        <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
-        <button id="compound-button" class="btn btn-success">Compound Rewards</button>
-        <h5 class="card-title mt-3">Current APR</h5>
-        <p class="card-text" id="current-apr">Loading...</p>
-        <h5 class="card-title mt-3">Staked Amount</h5>
-        <p class="card-text" id="staked-amount">Loading...</p>
+        <div class="card-text-section">
+          <h5 class="card-title">Claimable Staking Rewards</h5>
+          <p class="card-text" id="claimable-rewards">Loading...</p>
+          <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
+          <button id="compound-button" class="btn btn-success">Compound Rewards</button>
+          <h5 class="card-title mt-3">Current APR</h5>
+          <p class="card-text" id="current-apr">Loading...</p>
+          <h5 class="card-title mt-3">Staked Amount</h5>
+          <p class="card-text" id="staked-amount">Loading...</p>
+        </div>
+        <div class="card-explanation">
+          <p>This card shows your claimable staking rewards, the current annual percentage rate (APR), and the amount of tokens you have staked. You can claim your rewards or compound them to buy more tokens and stake them automatically.</p>
+        </div>
       </div>
     </div>
     <!-- Stake/Unstake Box -->
     <div class="card mt-4">
       <div class="card-body">
-        <h5 class="card-title">Stake/Unstake CFT</h5>
-        <p class="card-text" id="available-cft">Loading...</p>
-        <input type="number" id="stake-amount" class="form-control" placeholder="Enter amount to stake">
-        <button id="stake-button" class="btn btn-success">Stake</button>
-        <button id="unstake-button" class="btn btn-danger">Unstake</button>
+        <div class="card-text-section">
+          <h5 class="card-title">Stake/Unstake CFT</h5>
+          <p class="card-text" id="available-cft">Loading...</p>
+          <input type="number" id="stake-amount" class="form-control" placeholder="Enter amount to stake">
+          <button id="stake-button" class="btn btn-success">Stake</button>
+          <button id="unstake-button" class="btn btn-danger">Unstake</button>
+        </div>
+        <div class="card-explanation">
+          <p>This card allows you to stake or unstake your CFT tokens. Enter the amount you want to stake or unstake and click the respective button.</p>
+        </div>
       </div>
     </div>
     <!-- Buy Box -->
     <div class="card mt-4">
       <div class="card-body">
-        <h5 class="card-title">Buy CFT</h5>
-        <p class="card-text">Current CFT Price: 1 TRX</p>
-        <p class="card-text" id="available-trx">Loading...</p>
-        <input type="number" id="buy-amount" class="form-control" placeholder="Enter amount to buy">
-        <button id="buy-button" class="btn btn-primary">Buy CFT</button>
+        <div class="card-text-section">
+          <h5 class="card-title">Buy CFT</h5>
+          <p class="card-text">Current CFT Price: 1 TRX</p>
+          <p class="card-text" id="available-trx">Loading...</p>
+          <input type="number" id="buy-amount" class="form-control" placeholder="Enter amount to buy">
+          <button id="buy-button" class="btn btn-primary">Buy CFT</button>
+        </div>
+        <div class="card-explanation">
+          <p>This card shows the current price of CFT tokens in TRX and the amount of TRX you have available. Enter the amount of CFT tokens you want to buy and click the "Buy CFT" button.</p>
+        </div>
       </div>
     </div>
   </div>
