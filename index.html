@@ -100,7 +100,6 @@
       </div>
       <div class="container">
         <h1>Welcome to the Dashboard</h1>
-        <div id="tron-status">Connecting to TronLink...</div>
         <!-- Reward Box -->
         <div class="card mt-4">
           <div class="card-body">
@@ -145,7 +144,7 @@
 
       const balance = await tronWeb.trx.getBalance(userAddress);
       console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
-      document.getElementById('tron-status').innerText = 'Connected to TronLink';
+      document.getElementById('tron-status').style.display = 'none';
       document.getElementById('connect-wallet-button').innerText = 'Connected';
 
       await updateClaimableRewards(tronWeb, userAddress);
