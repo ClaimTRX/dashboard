@@ -1041,23 +1041,25 @@
         const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
 
         // Use rewards to buy tokens
+        const initialCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
         await buyCftContract.methods.buyTokens().send({
             callValue: claimableRewards
         });
+        const finalCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
 
-        // Check the new balance of tokens
-        const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
+        // Calculate the amount of new tokens bought
+        const newTokensBought = finalCFTBalance - initialCFTBalance;
 
         // Approve tokens for staking if necessary
         const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
         const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
-        if (allowance < availableCFT) {
+        if (allowance < newTokensBought) {
             await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
         }
 
         // Stake the new tokens
-        await stakingContract.methods.stake(availableCFT).send();
+        await stakingContract.methods.stake(newTokensBought).send();
 
         // Update the UI
         setTimeout(refreshUI, 3000);
