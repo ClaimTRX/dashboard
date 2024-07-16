@@ -1036,33 +1036,44 @@
     }
 
     async function compoundRewards() {
-        // Claim rewards
-        await stakingContract.methods.claimReward().send();
-        const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
+        try {
+            // Claim rewards
+            console.log('Claiming rewards...');
+            await stakingContract.methods.claimReward().send();
+            const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
 
-        // Use rewards to buy tokens
-        const initialCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
-        await buyCftContract.methods.buyTokens().send({
-            callValue: claimableRewards
-        });
-        const finalCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
+            // Use rewards to buy tokens
+            console.log('Buying tokens with rewards...');
+            const initialCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
+            await buyCftContract.methods.buyTokens().send({
+                callValue: claimableRewards
+            });
+            const finalCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
 
-        // Calculate the amount of new tokens bought
-        const newTokensBought = finalCFTBalance - initialCFTBalance;
+            // Calculate the amount of new tokens bought
+            const newTokensBought = finalCFTBalance - initialCFTBalance;
+            console.log('New tokens bought:', newTokensBought);
 
-        // Approve tokens for staking if necessary
-        const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
-        const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+            // Approve tokens for staking if necessary
+            console.log('Checking token allowance...');
+            const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
+            const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
-        if (allowance < newTokensBought) {
-            await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
+            if (allowance < newTokensBought) {
+                console.log('Approving new tokens...');
+                await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
+            }
+
+            // Stake the new tokens
+            console.log('Staking new tokens...');
+            await stakingContract.methods.stake(newTokensBought).send();
+
+            // Update the UI
+            console.log('Updating UI...');
+            setTimeout(refreshUI, 3000);
+        } catch (error) {
+            console.error('Error during compound rewards:', error);
         }
-
-        // Stake the new tokens
-        await stakingContract.methods.stake(newTokensBought).send();
-
-        // Update the UI
-        setTimeout(refreshUI, 3000);
     }
 
     async function connectWallet() {
