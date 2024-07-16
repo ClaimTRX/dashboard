@@ -204,11 +204,14 @@
         <div class="card-text-section">
           <h5 class="card-title">TRC20 Draw</h5>
           <p class="card-text" id="available-trc20">Loading...</p>
-          <input type="number" id="draw-amount" class="form-control" placeholder="Enter amount to draw">
-          <button id="draw-button" class="btn btn-success">Draw</button>
+          <div id="warningMessage" class="card-text" style="color: red; display: none;">To register, please have 100 CFT unstaked in your wallet.</div>
+          <input type="number" id="draw-amount" class="form-control" placeholder="Enter amount to draw" disabled>
+          <button id="register-button" class="btn btn-success" disabled>Register</button>
+          <button id="draw-button" class="btn btn-primary" disabled>Draw</button>
         </div>
         <div class="card-explanation">
-          <p>This card allows you to draw TRC20 tokens. Enter the amount you want to draw and click the "Draw" button.</p>
+          <div id="timer">Next draw in: --:--:--</div>
+          <div id="prizeAmount">Current prize: 0 TOKEN</div>
         </div>
       </div>
     </div>
@@ -217,11 +220,10 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
   <script>
-    let tronWeb, userAddress, trc20DrawContract;
-    const trc20DrawContractAddress = 'YOUR_TRC20_CONTRACT_ADDRESS';
-    const trc20DrawContractAbi = [
-      // Add your TRC20 Draw Contract ABI here
-    ];
+    const trc20DrawContractAddress = 'TSvQFgoTzi8V8qwZXzBDCssDJjJENNHSg2';
+    const cftTokenAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
+    let tronWeb, userAddress, trc20DrawContract, cftTokenContract;
+    const decimals = 18;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (await checkTronLinkInstalled()) {
@@ -254,7 +256,8 @@
         const balance = await tronWeb.trx.getBalance(userAddress);
         console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-        trc20DrawContract = await tronWeb.contract(trc20DrawContractAbi, trc20DrawContractAddress);
+        trc20DrawContract = await tronWeb.contract().at(trc20DrawContractAddress);
+        cftTokenContract = await tronWeb.contract().at(cftTokenAddress);
 
         updateUI(balance);
       } catch (error) {
@@ -265,6 +268,8 @@
     async function updateUI(balance) {
       try {
         await updateAvailableTRC20();
+        await checkCFTTokenBalance();
+        startDataUpdates();
       } catch (error) {
         console.error('Error updating UI:', error);
       }
@@ -275,11 +280,61 @@
       document.getElementById('available-trc20').innerText = 'Available TRC20: ' + formatNumber(tronWeb.fromSun(availableTRC20)) + ' TRC20';
     }
 
-    async function connectWallet() {
-      if (await checkTronLinkInstalled()) {
-        await initializeTronWeb();
-      } else {
-        console.log('Please install TronLink extension in your browser.');
+    async function checkCFTTokenBalance() {
+      try {
+        const balance = await cftTokenContract.methods.balanceOf(userAddress).call();
+        if (tronWeb.toDecimal(balance) >= 100 * 10 ** 6) { // Assuming CFT has 6 decimals
+          document.getElementById('warningMessage').style.display = 'none';
+          document.getElementById('register-button').disabled = false;
+          document.getElementById('draw-amount').disabled = false;
+        } else {
+          document.getElementById('warningMessage').style.display = 'block';
+          document.getElementById('register-button').disabled = true;
+          document.getElementById('draw-amount').disabled = true;
+        }
+      } catch (error) {
+        console.error('Error checking CFT token balance:', error);
+      }
+    }
+
+    async function startDataUpdates() {
+      setInterval(() => {
+        updateTimer();
+        updatePrizeAmount();
+      }, 1000);
+    }
+
+    async function updateTimer() {
+      try {
+        const lastDrawTime = parseInt(await trc20DrawContract.methods.lastDrawTime().call());
+        const interval = parseInt(await trc20DrawContract.methods.interval().call());
+        const currentTime = Math.floor(Date.now() / 1000);
+        const timeLeft = lastDrawTime + interval - currentTime;
+
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+
+        const timerDisplay = document.getElementById('timer');
+        if (timeLeft > 0) {
+          timerDisplay.innerText = `Next draw in: ${hours}:${minutes}:${seconds}`;
+          document.getElementById('draw-button').disabled = true;
+        } else {
+          timerDisplay.innerText = "Draw is available!";
+          document.getElementById('draw-button').disabled = false;
+        }
+      } catch (error) {
+        console.error('Error updating timer:', error);
+      }
+    }
+
+    async function updatePrizeAmount() {
+      try {
+        const prizeAmount = parseInt(await trc20DrawContract.methods.prizeAmount().call());
+        const tokenName = await trc20DrawContract.methods.name().call();
+        document.getElementById('prizeAmount').innerText = `Current prize: ${formatNumber(prizeAmount / 10 ** decimals)} ${tokenName}`;
+      } catch (error) {
+        console.error('Error updating prize amount:', error);
       }
     }
 
@@ -287,21 +342,32 @@
       return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    document.getElementById('draw-button').addEventListener('click', async () => {
-      const drawAmount = document.getElementById('draw-amount').value;
-      if (drawAmount) {
-        try {
-          await drawTokens(drawAmount);
-          setTimeout(updateAvailableTRC20, 3000);
-        } catch (error) {
-          console.error('Error drawing tokens:', error);
-        }
+    document.getElementById('register-button').addEventListener('click', async () => {
+      try {
+        await trc20DrawContract.methods.register().send();
+        alert('Registered successfully!');
+      } catch (error) {
+        console.error('Error registering:', error);
+        alert('Error registering: ' + error.message);
       }
     });
 
-    async function drawTokens(amount) {
-      const amountToDraw = tronWeb.toSun(amount);
-      await trc20DrawContract.methods.draw(amountToDraw).send();
+    document.getElementById('draw-button').addEventListener('click', async () => {
+      try {
+        await trc20DrawContract.methods.draw().send();
+        alert('Draw executed successfully!');
+      } catch (error) {
+        console.error('Error executing draw:', error);
+        alert('Error executing draw: ' + error.message);
+      }
+    });
+
+    async function connectWallet() {
+      if (await checkTronLinkInstalled()) {
+        await initializeTronWeb();
+      } else {
+        console.log('Please install TronLink extension in your browser.');
+      }
     }
   </script>
 </body>
