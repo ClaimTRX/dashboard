@@ -121,8 +121,20 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await connectWallet();
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+        await initializeTronWeb();
+      } else {
+        setTimeout(checkTronWeb, 1000);
+      }
     });
+
+    function checkTronWeb() {
+      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+        initializeTronWeb();
+      } else {
+        setTimeout(checkTronWeb, 1000);
+      }
+    }
 
     async function initializeTronWeb() {
       const tronWeb = window.tronWeb;
@@ -134,14 +146,10 @@
       const balance = await tronWeb.trx.getBalance(userAddress);
       console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
       document.getElementById('tron-status').innerText = 'Connected to TronLink';
-
-      // Update button text
       document.getElementById('connect-wallet-button').innerText = 'Connected';
 
-      // Fetch and display claimable staking rewards
       await updateClaimableRewards(tronWeb, userAddress);
 
-      // Claim rewards button
       document.getElementById('claim-rewards-button').addEventListener('click', async () => {
         try {
           const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
@@ -149,7 +157,6 @@
           const transaction = await contract.methods.claimReward().send();
           console.log('Transaction:', transaction);
 
-          // Update claimable rewards after claiming
           await updateClaimableRewards(tronWeb, userAddress);
         } catch (error) {
           console.error('Error:', error);
@@ -167,8 +174,6 @@
     async function connectWallet() {
       if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
         await initializeTronWeb();
-      } else {
-        alert('Please install TronLink extension in your browser.');
       }
     }
   </script>
