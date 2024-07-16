@@ -855,7 +855,7 @@
         }
     ];
 
-   document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', async () => {
         if (await checkTronLinkInstalled()) {
             await initializeTronWeb();
         }
@@ -879,8 +879,12 @@
         document.getElementById('connect-button').innerText = 'Connected';
         document.getElementById('connect-button').disabled = true;
 
+        console.log('Connected to TronLink.');
+        console.log('User Address:', userAddress);
+
         try {
             const balance = await tronWeb.trx.getBalance(userAddress);
+            console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
             stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
             tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
@@ -998,7 +1002,7 @@
     }
 
     async function unstakeTokens() {
-        const unstakeAmount = document.getElementById('stake-amount').value;
+        const unstakeAmount = document.getElementById('stake-amount').value; // or another element for the unstake amount if different
         await stakingContract.methods.withdraw(tronWeb.toSun(unstakeAmount)).send();
         const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
         document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
@@ -1027,24 +1031,6 @@
         await buyCftContract.methods.buyTokens().send({
             callValue: claimableRewards
         });
-
-        // Check the new balance of tokens before and after buy
-        const initialCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
-
-        // Calculate the newly bought tokens
-        const finalCFTBalance = await tokenContract.methods.balanceOf(userAddress).call();
-        const newlyBoughtCFT = finalCFTBalance - initialCFTBalance;
-
-        // Approve tokens for staking if necessary
-        const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
-        const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-
-        if (allowance < newlyBoughtCFT) {
-            await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
-        }
-
-        // Stake the new tokens
-        await stakingContract.methods.stake(newlyBoughtCFT).send();
 
         // Update the UI
         setTimeout(refreshUI, 3000);
