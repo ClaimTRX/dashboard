@@ -60,16 +60,29 @@
       font-size: 1.2rem;
     }
 
-    .btn-success, .btn-danger {
+    .btn-success, .btn-danger, .btn-primary {
       border: none;
       border-radius: 5px;
       cursor: pointer;
       font-size: 1rem;
       padding: 10px 20px;
+      width: 100%;
     }
 
     .btn-danger {
       background-color: #ff4c4c;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -104,9 +117,19 @@
           <div class="card-body">
             <h5 class="card-title">Stake/Unstake CFT</h5>
             <p class="card-text" id="available-cft">Loading...</p>
-            <input type="number" id="stake-amount" placeholder="Enter amount to stake" class="form-control mb-3">
+            <input type="number" id="stake-amount" placeholder="Enter amount to stake" class="form-control">
             <button id="stake-button" class="btn btn-success">Stake</button>
             <button id="unstake-button" class="btn btn-danger">Unstake</button>
+          </div>
+        </div>
+        <!-- Buy CFT Box -->
+        <div class="card mt-4">
+          <div class="card-body">
+            <h5 class="card-title">Buy CFT</h5>
+            <p class="card-text" id="cft-price">Loading...</p>
+            <p class="card-text" id="available-trx">Loading...</p>
+            <input type="number" id="buy-amount" placeholder="Enter amount to buy" class="form-control">
+            <button id="buy-button" class="btn btn-primary">Buy CFT</button>
           </div>
         </div>
       </div>
@@ -146,45 +169,65 @@
       const balance = await tronWeb.trx.getBalance(userAddress);
       console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-      const contract = await tronWeb.contract().at(contractAddress);
-      
+      // Staking Contract
+      const stakingContractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+      const stakingContractAbi = [
+        // ABI details go here
+      ];
+      const stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
+
+      // Token Contract
+      const tokenContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
+      const tokenContractAbi = [
+        // ABI details go here
+      ];
+      const tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
+
+      // Buy CFT Contract
+      const buyCftContractAddress = 'TNd9QQNUUENTQWCs81yan3ttzahQXHJhAC';
+      const buyCftContractAbi = [
+        // ABI details go here
+      ];
+      const buyCftContract = await tronWeb.contract(buyCftContractAbi, buyCftContractAddress);
+
       // Fetch and display claimable staking rewards
-      const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
+      const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
       document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
 
       // Fetch and display current APR
-      const currentAPR = await contract.methods.viewAPR().call();
+      const currentAPR = await stakingContract.methods.viewAPR().call();
       document.getElementById('current-apr').innerText = formatAPR(currentAPR) + ' %';
 
       // Fetch and display staked amount
-      const stakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
+      const stakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
       document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
 
       // Fetch and display available CFT tokens in connected wallet
-      const cftContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
-      const cftContractAbi = [
-        // ABI details go here
-      ];
-      const cftContract = await tronWeb.contract(cftContractAbi, cftContractAddress);
-      const availableCFT = await cftContract.methods.balanceOf(userAddress).call();
+      const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
       document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
+
+      // Fetch and display current price of CFT
+      const cftPrice = await buyCftContract.methods.tokenPrice().call();
+      document.getElementById('cft-price').innerText = 'Current CFT Price: ' + formatNumber(tronWeb.fromSun(cftPrice)) + ' TRX';
+
+      // Fetch and display available TRX in connected wallet
+      document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(balance)) + ' TRX';
 
       // Stake button
       document.getElementById('stake-button').addEventListener('click', async () => {
         const stakeAmount = document.getElementById('stake-amount').value;
         if (stakeAmount) {
           try {
-            const allowance = await cftContract.methods.allowance(userAddress, contractAddress).call();
+            const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
             const amountToStake = tronWeb.toSun(stakeAmount);
             const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
             if (allowance < amountToStake) {
-              await cftContract.methods.approve(contractAddress, maxUint256).send();
+              await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
             }
 
-            await contract.methods.stake(amountToStake).send();
-            const newStakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
+            await stakingContract.methods.stake(amountToStake).send();
+            const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
             document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
           } catch (error) {
             console.error('Error:', error);
@@ -195,8 +238,8 @@
       // Unstake button
       document.getElementById('unstake-button').addEventListener('click', async () => {
         try {
-          await contract.methods.unstake().send();
-          const newStakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
+          await stakingContract.methods.unstake().send();
+          const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
           document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
         } catch (error) {
           console.error('Error:', error);
@@ -206,11 +249,27 @@
       // Claim rewards button
       document.getElementById('claim-rewards-button').addEventListener('click', async () => {
         try {
-          await contract.methods.claimReward().send();
-          const newClaimableRewards = await contract.methods.viewPendingReward(userAddress).call();
+          await stakingContract.methods.claimReward().send();
+          const newClaimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
           document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(newClaimableRewards)) + ' TRX';
         } catch (error) {
           console.error('Error:', error);
+        }
+      });
+
+      // Buy CFT button
+      document.getElementById('buy-button').addEventListener('click', async () => {
+        const buyAmount = document.getElementById('buy-amount').value;
+        if (buyAmount) {
+          try {
+            await buyCftContract.methods.buyTokens(tronWeb.toSun(buyAmount)).send({
+              callValue: tronWeb.toSun(buyAmount * cftPrice)
+            });
+            const newBalance = await tronWeb.trx.getBalance(userAddress);
+            document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(newBalance)) + ' TRX';
+          } catch (error) {
+            console.error('Error:', error);
+          }
         }
       });
     }
