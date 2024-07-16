@@ -68,10 +68,26 @@
       font-size: 1rem;
       padding: 10px 20px;
     }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        height: auto;
+        width: 100%;
+        text-align: center;
+      }
+
+      .topbar {
+        text-align: center;
+      }
+
+      .container {
+        margin-top: 20px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="d-flex">
+  <div class="d-flex flex-column flex-md-row">
     <div class="sidebar">
       <h2>Maxton</h2>
       <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -100,13 +116,16 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
   <script>
+    function formatNumber(number) {
+      return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
         console.log('TronLink is installed and connected.');
         await initializeTronWeb();
       } else {
         console.log('Please install TronLink.');
-        
       }
     });
 
@@ -122,22 +141,29 @@
       document.getElementById('tron-status').innerText = 'Connected to TronLink';
 
       // Fetch and display claimable staking rewards
-      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-      const contract = await tronWeb.contract().at(contractAddress);
-      const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
-      document.getElementById('claimable-rewards').innerText = tronWeb.fromSun(claimableRewards) + ' TRX';
+      await updateClaimableRewards(tronWeb, userAddress);
 
       // Claim rewards button
       document.getElementById('claim-rewards-button').addEventListener('click', async () => {
         try {
+          const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+          const contract = await tronWeb.contract().at(contractAddress);
           const transaction = await contract.methods.claimReward().send();
-          alert('Rewards claimed successfully!');
           console.log('Transaction:', transaction);
+
+          // Update claimable rewards after claiming
+          await updateClaimableRewards(tronWeb, userAddress);
         } catch (error) {
-          alert('Failed to claim rewards.');
           console.error('Error:', error);
         }
       });
+    }
+
+    async function updateClaimableRewards(tronWeb, userAddress) {
+      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+      const contract = await tronWeb.contract().at(contractAddress);
+      const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
+      document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
     }
 
     async function connectWallet() {
