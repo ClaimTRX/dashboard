@@ -929,6 +929,10 @@
         console.error('Error updating UI:', error);
     }
 }
+    function formatAPR(apr) {
+    return (parseFloat(apr) / 100).toFixed(2);
+}
+
 
 
     function setupEventListeners() {
