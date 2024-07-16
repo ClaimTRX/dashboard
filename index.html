@@ -154,15 +154,13 @@
       <button id="connect-button" onclick="connectWallet()">Connect Wallet</button>
       <nav class="d-md-none">
         <a href="#"></i>CFT Token</a>
-        
-      </nav>
+        </nav>
     </div>
     <div class="d-flex flex-grow-1">
       <div class="sidebar d-none d-md-block">
         <h2>CFT</h2>
-        <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <a href="#"><i class="fas fa-user"></i> Profile</a>
-        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        <a href="#"></i>CFT Token</a>
+        
       </div>
       <div class="flex-grow-1">
         <div class="container">
@@ -866,7 +864,7 @@
         }
     ];
 
-    document.addEventListener('DOMContentLoaded', async () => {
+   document.addEventListener('DOMContentLoaded', async () => {
         if (await checkTronLinkInstalled()) {
             await initializeTronWeb();
         }
@@ -908,31 +906,26 @@
     }
 
     async function updateUI(balance) {
-    try {
-        const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
-        document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
+        try {
+            const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
+            document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
 
-        const currentAPR = await stakingContract.methods.viewAPR().call();
-        document.getElementById('current-apr').innerText = formatAPR(currentAPR) + ' %';
+            const currentAPR = await stakingContract.methods.viewAPR().call();
+            document.getElementById('current-apr').innerText = formatAPR(currentAPR) + ' %';
 
-        const stakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
-        document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
+            const stakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
+            document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
 
-        const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
-        document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
+            const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
+            document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
 
-        document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(balance)) + ' TRX';
+            document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(balance)) + ' TRX';
 
-        setupEventListeners();
-    } catch (error) {
-        console.error('Error updating UI:', error);
+            setupEventListeners();
+        } catch (error) {
+            console.error('Error updating UI:', error);
+        }
     }
-}
-    function formatAPR(apr) {
-    return (parseFloat(apr) / 1000).toFixed(2);
-}
-
-
 
     function setupEventListeners() {
         document.getElementById('stake-button').addEventListener('click', async () => {
@@ -940,17 +933,17 @@
             if (stakeAmount) {
                 try {
                     await stakeTokens(stakeAmount);
+                    await refreshBalance();
                 } catch (error) {
                     console.error('Error staking tokens:', error);
                 }
             }
-          
-
         });
 
         document.getElementById('unstake-button').addEventListener('click', async () => {
             try {
                 await unstakeTokens();
+                await refreshBalance();
             } catch (error) {
                 console.error('Error unstaking tokens:', error);
             }
@@ -959,6 +952,7 @@
         document.getElementById('claim-rewards-button').addEventListener('click', async () => {
             try {
                 await claimRewards();
+                await refreshBalance();
             } catch (error) {
                 console.error('Error claiming rewards:', error);
             }
@@ -969,6 +963,7 @@
             if (buyAmount) {
                 try {
                     await buyTokens(buyAmount);
+                    await refreshBalance();
                 } catch (error) {
                     console.error('Error buying tokens:', error);
                 }
@@ -991,16 +986,11 @@
     }
 
     async function unstakeTokens() {
-    try {
         const unstakeAmount = document.getElementById('stake-amount').value; // or another element for the unstake amount if different
         await stakingContract.methods.withdraw(tronWeb.toSun(unstakeAmount)).send();
         const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
         document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
-    } catch (error) {
-        console.error('Error unstaking tokens:', error);
     }
-}
-
 
     async function claimRewards() {
         await stakingContract.methods.claimReward().send();
@@ -1009,23 +999,27 @@
     }
 
     async function buyTokens(amount) {
-    try {
         await buyCftContract.methods.buyTokens().send({
             callValue: tronWeb.toSun(amount)
         });
         const newBalance = await tronWeb.trx.getBalance(userAddress);
         document.getElementById('available-trx').innerText = 'Available TRX: ' + formatNumber(tronWeb.fromSun(newBalance)) + ' TRX';
-    } catch (error) {
-        console.error('Error buying tokens:', error);
     }
-}
-
 
     async function connectWallet() {
         if (await checkTronLinkInstalled()) {
             await initializeTronWeb();
         } else {
             console.log('Please install TronLink extension in your browser.');
+        }
+    }
+
+    async function refreshBalance() {
+        try {
+            const balance = await tronWeb.trx.getBalance(userAddress);
+            updateUI(balance);
+        } catch (error) {
+            console.error('Error refreshing balance:', error);
         }
     }
 
@@ -1036,6 +1030,6 @@
     function formatAPR(apr) {
         return (parseFloat(apr) / 10000).toFixed(2);
     }
-  </script>
+</script>
 </body>
 </html>
