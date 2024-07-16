@@ -50,7 +50,6 @@
       color: white;
       border: none;
       border-radius: 10px;
-      margin-bottom: 20px;
     }
 
     .card-title {
@@ -61,8 +60,7 @@
       font-size: 1.2rem;
     }
 
-    .btn-success {
-      background-color: #4CAF50;
+    .btn-success, .btn-danger {
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -71,46 +69,7 @@
     }
 
     .btn-danger {
-      background-color: #e74c3c;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      padding: 10px 20px;
-    }
-
-    .input-group {
-      margin-bottom: 15px;
-    }
-
-    .form-control {
-      border-radius: 5px;
-    }
-
-    .stake-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .stake-container input {
-      width: 60%;
-      margin-bottom: 10px;
-    }
-
-    .stake-container button {
-      width: 60%;
-      margin-bottom: 10px;
-    }
-
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type=number] {
-      -moz-appearance: textfield;
+      background-color: #ff4c4c;
     }
   </style>
 </head>
@@ -138,20 +97,16 @@
             <p class="card-text" id="current-apr">Loading...</p>
             <h5 class="card-title mt-3">Staked Amount</h5>
             <p class="card-text" id="staked-amount">Loading...</p>
-            <h5 class="card-title mt-3">Available CFT in Wallet</h5>
-            <p class="card-text" id="wallet-balance">Loading...</p>
           </div>
         </div>
-
         <!-- Stake/Unstake Box -->
-        <div class="card">
+        <div class="card mt-4">
           <div class="card-body">
             <h5 class="card-title">Stake/Unstake CFT</h5>
-            <div class="stake-container">
-              <input type="number" class="form-control" id="stake-amount" placeholder="Enter CFT amount" />
-              <button id="stake-button" class="btn btn-success">Stake</button>
-              <button id="unstake-button" class="btn btn-danger">Unstake</button>
-            </div>
+            <p class="card-text" id="available-cft">Loading...</p>
+            <input type="number" id="stake-amount" placeholder="Enter amount to stake" class="form-control mb-3">
+            <button id="stake-button" class="btn btn-success">Stake</button>
+            <button id="unstake-button" class="btn btn-danger">Unstake</button>
           </div>
         </div>
       </div>
@@ -161,10 +116,6 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
   <script>
-    const tokenAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
-    const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-    let tronWeb, userAddress, contract, tokenContract;
-
     document.addEventListener('DOMContentLoaded', async () => {
       if (await checkTronLinkInstalled()) {
         await initializeTronWeb();
@@ -183,8 +134,8 @@
     }
 
     async function initializeTronWeb() {
-      tronWeb = window.tronWeb;
-      userAddress = tronWeb.defaultAddress.base58;
+      const tronWeb = window.tronWeb;
+      const userAddress = tronWeb.defaultAddress.base58;
 
       document.getElementById('connect-button').innerText = 'Connected';
       document.getElementById('connect-button').disabled = true;
@@ -195,9 +146,9 @@
       const balance = await tronWeb.trx.getBalance(userAddress);
       console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-      contract = await tronWeb.contract().at(contractAddress);
-      tokenContract = await tronWeb.contract().at(tokenAddress);
-
+      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+      const contract = await tronWeb.contract().at(contractAddress);
+      
       // Fetch and display claimable staking rewards
       const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
       document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
@@ -210,13 +161,36 @@
       const stakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
       document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
 
-      // Fetch and display available CFT balance in wallet
-      const walletBalance = await tokenContract.methods.balanceOf(userAddress).call();
-      document.getElementById('wallet-balance').innerText = formatNumber(tronWeb.fromSun(walletBalance)) + ' CFT';
+      // Fetch and display available CFT tokens in connected wallet
+      const cftContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
+      const cftContract = await tronWeb.contract().at(cftContractAddress);
+      const availableCFT = await cftContract.methods.balanceOf(userAddress).call();
+      document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
 
-      // Event listeners for stake and unstake buttons
-      document.getElementById('stake-button').addEventListener('click', stakeTokens);
-      document.getElementById('unstake-button').addEventListener('click', unstakeTokens);
+      // Stake button
+      document.getElementById('stake-button').addEventListener('click', async () => {
+        const stakeAmount = document.getElementById('stake-amount').value;
+        if (stakeAmount) {
+          try {
+            await cftContract.methods.stake(tronWeb.toSun(stakeAmount)).send();
+            const newStakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
+            document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        }
+      });
+
+      // Unstake button
+      document.getElementById('unstake-button').addEventListener('click', async () => {
+        try {
+          await cftContract.methods.unstake().send();
+          const newStakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
+          document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });
 
       // Claim rewards button
       document.getElementById('claim-rewards-button').addEventListener('click', async () => {
@@ -235,47 +209,6 @@
         await initializeTronWeb();
       } else {
         console.log('Please install TronLink extension in your browser.');
-      }
-    }
-
-    async function stakeTokens() {
-      const amount = document.getElementById('stake-amount').value;
-      if (amount <= 0) {
-        alert('Please enter a valid amount.');
-        return;
-      }
-
-      const amountInSun = tronWeb.toSun(amount);
-      const allowance = await tokenContract.methods.allowance(userAddress, contractAddress).call();
-
-      if (parseInt(allowance) < parseInt(amountInSun)) {
-        await tokenContract.methods.approve(contractAddress, tronWeb.toSun(Number.MAX_SAFE_INTEGER)).send();
-      }
-
-      try {
-        await contract.methods.stake(amountInSun).send();
-        const stakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
-        document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
-      } catch (error) {
-        console.error('Stake Error:', error);
-      }
-    }
-
-    async function unstakeTokens() {
-      const amount = document.getElementById('stake-amount').value;
-      if (amount <= 0) {
-        alert('Please enter a valid amount.');
-        return;
-      }
-
-      const amountInSun = tronWeb.toSun(amount);
-
-      try {
-        await contract.methods.unstake(amountInSun).send();
-        const stakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
-        document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
-      } catch (error) {
-        console.error('Unstake Error:', error);
       }
     }
 
