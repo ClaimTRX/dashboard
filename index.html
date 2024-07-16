@@ -868,7 +868,7 @@
         }
     ];
 
-    document.addEventListener('DOMContentLoaded', async () => {
+   document.addEventListener('DOMContentLoaded', async () => {
         if (await checkTronLinkInstalled()) {
             await initializeTronWeb();
         }
@@ -1047,6 +1047,14 @@
 
         // Check the new balance of tokens
         const availableCFT = await tokenContract.methods.balanceOf(userAddress).call();
+
+        // Approve tokens for staking if necessary
+        const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
+        const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+        if (allowance < availableCFT) {
+            await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
+        }
 
         // Stake the new tokens
         await stakingContract.methods.stake(availableCFT).send();
