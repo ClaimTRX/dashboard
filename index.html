@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CFT</title>
+  <title>CFT Dashboard</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
@@ -61,7 +61,6 @@
     }
 
     .btn-success, .btn-warning {
-      background-color: #4CAF50;
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -84,7 +83,7 @@
     </div>
     <div class="flex-grow-1">
       <div class="topbar">
-        <button id="connect-button" onclick="connectWallet()">Connect Wallet</button>
+        <button id="connectWallet">Connect Wallet</button>
       </div>
       <div class="container">
         <h1>Welcome to the Dashboard</h1>
@@ -92,19 +91,21 @@
         <div class="card mt-4">
           <div class="card-body">
             <h5 class="card-title">Claimable Staking Rewards</h5>
-            <p class="card-text" id="claimable-rewards">Loading...</p>
-            <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
+            <p class="card-text" id="userRewards">Loading...</p>
+            <button id="claimRewardsButton" class="btn btn-success">Claim Rewards</button>
           </div>
         </div>
         <!-- Staked Tokens and Available CFT -->
         <div class="card mt-4">
           <div class="card-body">
             <h5 class="card-title">Staked Tokens and Available CFT</h5>
-            <p class="card-text" id="staked-tokens">Staked Tokens: Loading...</p>
-            <p class="card-text" id="available-cft">Loading...</p>
-            <input type="number" id="stake-amount" placeholder="Amount to stake" class="form-control mb-2">
-            <button id="stake-button" class="btn btn-success">Stake</button>
-            <button id="unstake-button" class="btn btn-warning">Unstake</button>
+            <p class="card-text" id="userStakedBalance">Loading...</p>
+            <p class="card-text" id="unstakedBalance">Loading...</p>
+            <p class="card-text">Current APY: <span id="currentAPR">Loading...</span>%</p>
+            <input type="number" id="stakeAmount" placeholder="Amount to stake" class="form-control mb-2">
+            <button id="approveAndStakeButton" class="btn btn-success">Stake</button>
+            <input type="number" id="withdrawAmount" placeholder="Amount to withdraw" class="form-control mb-2 mt-2">
+            <button id="withdrawButton" class="btn btn-warning">Unstake</button>
           </div>
         </div>
       </div>
@@ -114,95 +115,103 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.min.js"></script>
   <script>
+    let tronWeb;
+    let stakingContract;
+    let tokenContract;
+    const stakingContractAbi = [/* ABI of your staking contract */];
+    const stakingContractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+    const tokenContractAbi = [/* ABI of your token contract */];
+    const tokenContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
+
     document.addEventListener('DOMContentLoaded', async () => {
-      await initializeTronWeb();
+      await connectWallet();
     });
-
-    async function initializeTronWeb() {
-      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-        const tronWeb = window.tronWeb;
-        const userAddress = tronWeb.defaultAddress.base58;
-
-        document.getElementById('connect-button').innerText = 'Connected';
-        document.getElementById('connect-button').disabled = true;
-
-        console.log('Connected to TronLink.');
-        console.log('User Address:', userAddress);
-
-        const balance = await tronWeb.trx.getBalance(userAddress);
-        console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
-
-        // Fetch and display claimable staking rewards
-        const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
-        const contract = await tronWeb.contract().at(contractAddress);
-        const claimableRewards = await contract.methods.viewPendingReward(userAddress).call();
-        document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(claimableRewards)) + ' TRX';
-
-        // Fetch and display staked tokens and available CFT
-        const stakedTokens = await contract.methods.viewStakedAmount(userAddress).call();
-        document.getElementById('staked-tokens').innerText = 'Staked Tokens: ' + formatNumber(tronWeb.fromSun(stakedTokens)) + ' CFT';
-
-        const cftContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
-        const cftContract = await tronWeb.contract().at(cftContractAddress);
-        const availableCFT = await cftContract.methods.balanceOf(userAddress).call();
-        document.getElementById('available-cft').innerText = 'Available CFT: ' + formatNumber(tronWeb.fromSun(availableCFT)) + ' CFT';
-
-        // Claim rewards button
-        document.getElementById('claim-rewards-button').addEventListener('click', async () => {
-          try {
-            await contract.methods.claimReward().send();
-            const newClaimableRewards = await contract.methods.viewPendingReward(userAddress).call();
-            document.getElementById('claimable-rewards').innerText = formatNumber(tronWeb.fromSun(newClaimableRewards)) + ' TRX';
-          } catch (error) {
-            console.error('Error:', error);
-          }
-        });
-
-        // Stake button
-        document.getElementById('stake-button').addEventListener('click', async () => {
-          const stakeAmount = document.getElementById('stake-amount').value;
-          const stakeAmountSun = tronWeb.toSun(stakeAmount);
-
-          try {
-            const allowance = await cftContract.methods.allowance(userAddress, contractAddress).call();
-            if (tronWeb.fromSun(allowance) < stakeAmount) {
-              await cftContract.methods.approve(contractAddress, tronWeb.toSun('1000000000')).send();
-            }
-
-            await contract.methods.stakeTokens(stakeAmountSun).send();
-            const newStakedTokens = await contract.methods.viewStakedAmount(userAddress).call();
-            document.getElementById('staked-tokens').innerText = 'Staked Tokens: ' + formatNumber(tronWeb.fromSun(newStakedTokens)) + ' CFT';
-          } catch (error) {
-            console.error('Error:', error);
-          }
-        });
-
-        // Unstake button
-        document.getElementById('unstake-button').addEventListener('click', async () => {
-          try {
-            await contract.methods.unstakeTokens().send();
-            const newStakedTokens = await contract.methods.viewStakedAmount(userAddress).call();
-            document.getElementById('staked-tokens').innerText = 'Staked Tokens: ' + formatNumber(tronWeb.fromSun(newStakedTokens)) + ' CFT';
-          } catch (error) {
-            console.error('Error:', error);
-          }
-        });
-      } else {
-        console.log('Please install TronLink.');
-      }
-    }
 
     async function connectWallet() {
       if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-        await initializeTronWeb();
+        tronWeb = window.tronWeb;
+        const walletAddress = tronWeb.defaultAddress.base58;
+        $('#connectWallet').text(`Connected`);
+        $('#connectWallet').prop('disabled', true);
+        stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
+        tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
+        await updateStakingInfo();
       } else {
-        console.log('Please install TronLink extension in your browser.');
+        console.log('Please install TronLink and log in.');
       }
     }
 
-    function formatNumber(num) {
-      return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    async function updateStakingInfo() {
+      try {
+        const totalStaked = await stakingContract.methods.viewTotalStaked().call();
+        const userStakedBalance = await stakingContract.methods.viewStakedAmount(tronWeb.defaultAddress.base58).call();
+        const userRewards = await stakingContract.methods.viewPendingReward(tronWeb.defaultAddress.base58).call();
+        const unstakedBalance = await tokenContract.methods.balanceOf(tronWeb.defaultAddress.base58).call();
+        const currentAPR = await stakingContract.methods.viewAPR().call();
+
+        const totalStakedValue = tronWeb.fromSun(totalStaked);
+        const userStakedBalanceValue = tronWeb.fromSun(userStakedBalance);
+        const userRewardsValue = tronWeb.fromSun(userRewards);
+        const unstakedBalanceValue = tronWeb.fromSun(unstakedBalance);
+        const currentAPRValue = currentAPR / 1e4;
+
+        $('#userStakedBalance').text(userStakedBalanceValue.toFixed(2) + " CFT");
+        $('#userRewards').text(userRewardsValue.toFixed(2) + " TRX");
+        $('#unstakedBalance').text(unstakedBalanceValue.toFixed(2) + " CFT");
+        $('#currentAPR').text(currentAPRValue.toFixed(2));
+      } catch (error) {
+        console.error('Error updating staking info:', error);
+      }
     }
+
+    async function approveAndStakeTokens() {
+      const amount = $('#stakeAmount').val();
+      if (amount <= 0) return alert('Please enter a valid amount to stake.');
+
+      try {
+        const allowance = await tokenContract.methods.allowance(tronWeb.defaultAddress.base58, stakingContractAddress).call();
+        const amountToStake = tronWeb.toSun(amount);
+        const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+        if (allowance < amountToStake) {
+          await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
+        }
+
+        await stakingContract.methods.stake(amountToStake).send();
+        await updateStakingInfo();
+        alert('Tokens approved and staked successfully.');
+      } catch (error) {
+        console.error('Error approving and staking tokens:', error);
+      }
+    }
+
+    async function withdrawTokens() {
+      const amount = $('#withdrawAmount').val();
+      if (amount <= 0) return alert('Please enter a valid amount to withdraw.');
+
+      try {
+        await stakingContract.methods.withdraw(tronWeb.toSun(amount)).send();
+        await updateStakingInfo();
+      } catch (error) {
+        console.error('Error withdrawing tokens:', error);
+      }
+    }
+
+    async function claimRewards() {
+      try {
+        await stakingContract.methods.claimReward().send();
+        await updateStakingInfo();
+      } catch (error) {
+        console.error('Error claiming rewards:', error);
+      }
+    }
+
+    $(document).ready(function() {
+      $('#connectWallet').on('click', connectWallet);
+      $('#approveAndStakeButton').on('click', approveAndStakeTokens);
+      $('#withdrawButton').on('click', withdrawTokens);
+      $('#claimRewardsButton').on('click', claimRewards);
+    });
   </script>
 </body>
 </html>
