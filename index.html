@@ -7,40 +7,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
-  <style>
-    body {
-      background-color: #1a1a2e;
-      color: #fff;
-    }
-    .sidebar {
-      height: 100vh;
-      background-color: #162447;
-      padding: 15px;
-    }
-    .sidebar a {
-      color: #fff;
-      text-decoration: none;
-      display: block;
-      padding: 10px 0;
-    }
-    .sidebar a:hover {
-      background-color: #1f4068;
-    }
-    .topbar {
-      background-color: #162447;
-      padding: 10px;
-      text-align: right;
-    }
-    .topbar button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 10px 20px;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="d-flex">
@@ -57,7 +24,41 @@
       <div class="container">
         <h1>Welcome to the Dashboard</h1>
         <div id="tron-status">Connecting to TronLink...</div>
-        <!-- Your dashboard content goes here -->
+        <!-- Reward Box -->
+        <div class="card mt-4" style="background-color: #2c3e50; color: white;">
+          <div class="card-body">
+            <h5 class="card-title">Claimable Staking Rewards</h5>
+            <p class="card-text" id="claimable-rewards">Loading...</p>
+          </div>
+        </div>
+        <div class="container mt-5">
+          <h2>Monthly Revenue</h2>
+          <canvas id="revenueChart"></canvas>
+        </div>
+        <div class="container mt-5">
+          <h2>User Data</h2>
+          <table class="table table-dark table-striped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>John Doe</td>
+                <td>john@example.com</td>
+                <td>Active</td>
+              </tr>
+              <tr>
+                <td>Jane Doe</td>
+                <td>jane@example.com</td>
+                <td>Inactive</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -85,6 +86,12 @@
       const balance = await tronWeb.trx.getBalance(userAddress);
       console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
       document.getElementById('tron-status').innerText = 'Connected to TronLink';
+
+      // Fetch and display claimable staking rewards
+      const contractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+      const contract = await tronWeb.contract().at(contractAddress);
+      const claimableRewards = await contract.methods.claimableRewards(userAddress).call();
+      document.getElementById('claimable-rewards').innerText = tronWeb.fromSun(claimableRewards) + ' TRX';
     }
 
     async function connectWallet() {
