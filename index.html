@@ -92,6 +92,8 @@
             <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
             <h5 class="card-title mt-3">Current APR</h5>
             <p class="card-text" id="current-apr">Loading...</p>
+            <h5 class="card-title mt-3">Staked Amount</h5>
+            <p class="card-text" id="staked-amount">Loading...</p>
           </div>
         </div>
       </div>
@@ -140,7 +142,11 @@
 
       // Fetch and display current APR
       const currentAPR = await contract.methods.viewAPR().call();
-      document.getElementById('current-apr').innerText = formatNumber(tronWeb.fromSun(currentAPR)) + ' %';
+      document.getElementById('current-apr').innerText = formatAPR(currentAPR) + ' %';
+
+      // Fetch and display staked amount
+      const stakedAmount = await contract.methods.viewStakedAmount(userAddress).call();
+      document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(stakedAmount)) + ' CFT';
 
       // Claim rewards button
       document.getElementById('claim-rewards-button').addEventListener('click', async () => {
@@ -164,6 +170,10 @@
 
     function formatNumber(num) {
       return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatAPR(apr) {
+      return (parseFloat(apr) * 100).toFixed(2);
     }
   </script>
 </body>
