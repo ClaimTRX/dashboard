@@ -106,11 +106,14 @@
     });
 
     async function checkTronLinkInstalled() {
-      if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-        return true;
-      } else {
-        return false;
-      }
+      return new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+            clearInterval(interval);
+            resolve(true);
+          }
+        }, 1000);
+      });
     }
 
     async function initializeTronWeb() {
@@ -158,3 +161,4 @@
   </script>
 </body>
 </html>
+
