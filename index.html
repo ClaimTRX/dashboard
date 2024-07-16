@@ -7,174 +7,198 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <style>
-  body {
-    background-color: #1a1a2e;
-    color: #fff;
-  }
+    body {
+      background-color: #1a1a2e;
+      color: #fff;
+    }
 
-  .sidebar {
-    height: 100vh;
-    background-color: #162447;
-    padding: 15px;
-  }
-
-  .sidebar a {
-    color: #fff;
-    text-decoration: none;
-    display: block;
-    padding: 10px 0;
-  }
-
-  .sidebar a:hover {
-    background-color: #1f4068;
-  }
-
-  .topbar {
-    background-color: #162447;
-    padding: 10px;
-    text-align: right;
-  }
-
-  .topbar button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 8px 16px;
-  }
-
-  .card {
-    background-color: #2c3e50;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    padding: 20px;
-  }
-
-  .card-title {
-    font-size: 1.5rem;
-  }
-
-  .card-text {
-    font-size: 1rem;
-  }
-
-  .btn-success, .btn-danger, .btn-primary {
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.875rem;
-    padding: 8px 16px;
-    width: 20%; /* Adjust width */
-    margin-top: 10px;
-  }
-
-  .btn-danger {
-    background-color: #ff4c4c;
-  }
-
-  .btn-primary {
-    background-color: #007bff;
-  }
-
-  .form-control {
-    width: 20%; /* Adjust width */
-    padding: 8px;
-    font-size: 0.875rem;
-    border-radius: 5px;
-    margin-bottom: 10px;
-  }
-
-  input[type=number] {
-    -moz-appearance: textfield;
-  }
-
-  input[type=number]::-webkit-outer-spin-button,
-  input[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  @media (max-width: 767.98px) {
     .sidebar {
-      height: auto;
-      padding: 10px;
+      height: 100vh;
+      background-color: #162447;
+      padding: 15px;
+    }
+
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+      padding: 10px 0;
+    }
+
+    .sidebar a:hover {
+      background-color: #1f4068;
     }
 
     .topbar {
-      text-align: center;
+      background-color: #162447;
+      padding: 10px;
+      text-align: right;
+    }
+
+    .topbar button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 8px 16px;
+    }
+
+    .card {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      padding: 20px;
     }
 
     .card-title {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
     }
 
     .card-text {
-      font-size: 0.875rem;
+      font-size: 1rem;
     }
 
     .btn-success, .btn-danger, .btn-primary {
-      font-size: 0.75rem;
-      padding: 6px 12px;
-      width: 100%; /* Adjust width for mobile */
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: 8px 16px;
+      width: 20%;
+      margin-top: 10px;
+    }
+
+    .btn-danger {
+      background-color: #ff4c4c;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
     }
 
     .form-control {
-      font-size: 0.75rem;
-      padding: 6px;
-      width: 100%; /* Adjust width for mobile */
+      width: 20%;
+      padding: 8px;
+      font-size: 0.875rem;
+      border-radius: 5px;
+      margin-bottom: 10px;
     }
-  }
-</style>
 
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    @media (max-width: 767.98px) {
+      .sidebar {
+        display: none;
+      }
+
+      .topbar {
+        text-align: center;
+        padding: 10px;
+      }
+
+      .topbar nav {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 10px;
+      }
+
+      .topbar nav a {
+        color: #fff;
+        text-decoration: none;
+        padding: 5px 10px;
+        background-color: #1f4068;
+        border-radius: 5px;
+      }
+
+      .topbar nav a:hover {
+        background-color: #1f4068;
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+      }
+
+      .card-text {
+        font-size: 0.875rem;
+      }
+
+      .btn-success, .btn-danger, .btn-primary {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        width: 100%;
+      }
+
+      .form-control {
+        font-size: 0.75rem;
+        padding: 6px;
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="d-flex">
-    <div class="sidebar">
-      <h2>CFT</h2>
-      <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-      <a href="#"><i class="fas fa-user"></i> Profile</a>
-      <a href="#"><i class="fas fa-cog"></i> Settings</a>
+  <div class="d-flex flex-column">
+    <div class="topbar">
+      <button id="connect-button" onclick="connectWallet()">Connect Wallet</button>
+      <nav class="d-md-none">
+        <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#"><i class="fas fa-user"></i> Profile</a>
+        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+      </nav>
     </div>
-    <div class="flex-grow-1">
-      <div class="topbar">
-        <button id="connect-button" onclick="connectWallet()">Connect Wallet</button>
+    <div class="d-flex flex-grow-1">
+      <div class="sidebar d-none d-md-block">
+        <h2>CFT</h2>
+        <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#"><i class="fas fa-user"></i> Profile</a>
+        <a href="#"><i class="fas fa-cog"></i> Settings</a>
       </div>
-      <div class="container">
-        <h1>Welcome to the Dashboard</h1>
-        <!-- Reward Box -->
-        <div class="card mt-4">
-          <div class="card-body">
-            <h5 class="card-title">Claimable Staking Rewards</h5>
-            <p class="card-text" id="claimable-rewards">Loading...</p>
-            <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
-            <h5 class="card-title mt-3">Current APR</h5>
-            <p class="card-text" id="current-apr">Loading...</p>
-            <h5 class="card-title mt-3">Staked Amount</h5>
-            <p class="card-text" id="staked-amount">Loading...</p>
+      <div class="flex-grow-1">
+        <div class="container">
+          <h1>Welcome to the Dashboard</h1>
+          <!-- Reward Box -->
+          <div class="card mt-4">
+            <div class="card-body">
+              <h5 class="card-title">Claimable Staking Rewards</h5>
+              <p class="card-text" id="claimable-rewards">Loading...</p>
+              <button id="claim-rewards-button" class="btn btn-success">Claim Rewards</button>
+              <h5 class="card-title mt-3">Current APR</h5>
+              <p class="card-text" id="current-apr">Loading...</p>
+              <h5 class="card-title mt-3">Staked Amount</h5>
+              <p class="card-text" id="staked-amount">Loading...</p>
+            </div>
           </div>
-        </div>
-        <!-- Stake/Unstake Box -->
-        <div class="card mt-4">
-          <div class="card-body">
-            <h5 class="card-title">Stake/Unstake CFT</h5>
-            <p class="card-text" id="available-cft">Loading...</p>
-            <input type="number" id="stake-amount" placeholder="Enter amount to stake" class="form-control">
-            <button id="stake-button" class="btn btn-success">Stake</button><br>
-            <button id="unstake-button" class="btn btn-danger">Unstake</button>
+          <!-- Stake/Unstake Box -->
+          <div class="card mt-4">
+            <div class="card-body">
+              <h5 class="card-title">Stake/Unstake CFT</h5>
+              <p class="card-text" id="available-cft">Loading...</p>
+              <input type="number" id="stake-amount" placeholder="Enter amount to stake" class="form-control">
+              <button id="stake-button" class="btn btn-success">Stake</button>
+              <button id="unstake-button" class="btn btn-danger">Unstake</button>
+            </div>
           </div>
-        </div>
-        <!-- Buy CFT Box -->
-        <div class="card mt-4">
-          <div class="card-body">
-            <h5 class="card-title">Buy CFT</h5>
-            <p class="card-text">Current CFT Price: 1 TRX</p> <!-- Static price -->
-            <p class="card-text" id="available-trx">Loading...</p>
-            <input type="number" id="buy-amount" placeholder="Enter amount to buy" class="form-control">
-            <button id="buy-button" class="btn btn-primary">Buy CFT</button>
+          <!-- Buy CFT Box -->
+          <div class="card mt-4">
+            <div class="card-body">
+              <h5 class="card-title">Buy CFT</h5>
+              <p class="card-text">Current CFT Price: 1 TRX</p> <!-- Static price -->
+              <p class="card-text" id="available-trx">Loading...</p>
+              <input type="number" id="buy-amount" placeholder="Enter amount to buy" class="form-control">
+              <button id="buy-button" class="btn btn-primary">Buy CFT</button>
+            </div>
           </div>
         </div>
       </div>
