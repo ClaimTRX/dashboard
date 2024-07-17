@@ -1320,20 +1320,19 @@ The energy costs are:<br>
     }
 
     async function buyToken(listingId) {
-      try {
-        const listing = await marketplaceContract.methods.listings(listingId).call();
-        const totalPrice = listing.priceInTRX;
-
-        await marketplaceContract.methods.buyToken(listingId).send({
-          callValue: totalPrice
-        });
-
-        alert('Token purchased successfully!');
-        fetchMarketplaceListings();
-      } catch (error) {
-        console.error('Error buying token:', error);
-        alert('Failed to buy tokens.');
-      }
+            try {
+                const listing = await contract.methods.listings(listingId).call();
+                await contract.methods.buyToken(listingId).send({
+                    from: tronWeb.defaultAddress.base58,
+                    callValue: listing.priceInTRX
+                });
+                alert('Token purchased successfully!');
+                fetchListings();
+            } catch (error) {
+                console.error('Error buying token:', error);
+                alert('Failed to buy tokens.');
+            }
+        }
     }
 
     async function cancelListing(listingId) {
