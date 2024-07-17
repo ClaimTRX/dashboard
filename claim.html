@@ -81,8 +81,8 @@
       cursor: pointer;
       font-size: 0.875rem;
       padding: 8px 16px;
+      width: 20%; /* Adjust width */
       margin-top: 10px;
-      width: 100%; /* Adjust width */
     }
 
     .btn-danger {
@@ -94,7 +94,7 @@
     }
 
     .form-control {
-      width: 100%; /* Adjust width */
+      width: 20%; /* Adjust width */
       padding: 8px;
       font-size: 0.875rem;
       border-radius: 5px;
@@ -106,13 +106,6 @@
       font-size: 0.875rem;
     }
 
-    .listing {
-      background-color: #1f4068;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 15px;
-    }
-
     input[type=number] {
       -moz-appearance: textfield;
     }
@@ -121,6 +114,39 @@
     input[type=number]::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
+    }
+
+    .listing {
+      background-color: #1f4068;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .listing input[type="number"] {
+      width: 20%; /* Adjust width */
+      padding: 8px;
+      font-size: 0.875rem;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .listing button {
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: 8px 16px;
+      margin-top: 10px;
+      width: 20%; /* Adjust width */
+    }
+
+    .listing .btn-success {
+      background-color: #4CAF50;
+    }
+
+    .listing .btn-danger {
+      background-color: #ff4c4c;
     }
 
     @media (min-width: 768px) {
@@ -272,9 +298,7 @@ The energy costs are:<br>
         <h5 class="card-title">Listed for Sale</h5>
         <div id="listings" class="card-text">Loading...</div>
       </div>
-      <div class="card-explanation">
     </div>
-      </div>
   </div>
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
