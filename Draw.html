@@ -1380,23 +1380,28 @@
     }
 
     async function checkRegistrationStatusTRC20(walletAddress) {
-      try {
-        // Call the mapping as a function
-        const isRegistered = await trc20DrawContract.hasRegistered(walletAddress).call();
-        const registerButton = document.getElementById('trc20RegisterButton');
-        if (isRegistered) {
-          registerButton.textContent = 'Registered';
-          registerButton.disabled = true;
-        } else {
-          registerButton.textContent = 'Register';
-          registerButton.disabled = false;
-        }
-      } catch (error) {
-        console.error('Registration Status Error: ', error.message);
-        document.getElementById('trc20StatusMessage').textContent = 'Error checking registration status: ' + error.message;
-        document.getElementById('trc20StatusMessage').classList.remove('hidden');
-      }
+  try {
+    const isRegistered = await trc20DrawContract.hasRegistered(walletAddress).call();
+    const registerButton = document.getElementById('trc20RegisterButton');
+    if (isRegistered) {
+      registerButton.textContent = 'Registered';
+      registerButton.disabled = true;
+    } else {
+      registerButton.textContent = 'Register';
+      registerButton.disabled = false;
     }
+  } catch (error) {
+    if (error.response && error.response.status === 403) {
+      console.error('Permission Denied: ', error.message);
+      document.getElementById('trc20StatusMessage').textContent = 'Permission Denied: ' + error.message;
+    } else {
+      console.error('Registration Status Error: ', error.message);
+      document.getElementById('trc20StatusMessage').textContent = 'Error checking registration status: ' + error.message;
+    }
+    document.getElementById('trc20StatusMessage').classList.remove('hidden');
+  }
+}
+
 
     async function checkRegistrationStatusTRX(walletAddress) {
       try {
