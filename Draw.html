@@ -1073,26 +1073,28 @@
     }
 
     async function checkRegistrationStatus(walletAddress) {
-      try {
-        const isRegistered = await trc20DrawContract.methods.hasRegistered(walletAddress).call();
-        const registerButton = document.getElementById('register-button');
-        if (isRegistered) {
-          document.getElementById('statusMessage').textContent = 'You are already registered for this draw.';
-          document.getElementById('statusMessage').classList.remove('hidden');
-          registerButton.textContent = 'Already Registered';
-          registerButton.disabled = true;
-        } else {
-          document.getElementById('statusMessage').textContent = '';
-          document.getElementById('statusMessage').classList.add('hidden');
-          registerButton.textContent = 'Register';
-          registerButton.disabled = false;
-        }
-      } catch (error) {
-        console.error('Registration Status Error: ', error.message);
-        document.getElementById('statusMessage').textContent = 'Error checking registration status: ' + error.message;
-        document.getElementById('statusMessage').classList.remove('hidden');
-      }
+  try {
+    // Call the mapping as a function
+    const isRegistered = await trc20DrawContract.methods.hasRegistered(walletAddress).call();
+    const registerButton = document.getElementById('register-button');
+    if (isRegistered) {
+      document.getElementById('statusMessage').textContent = 'You are already registered for this draw.';
+      document.getElementById('statusMessage').classList.remove('hidden');
+      registerButton.textContent = 'Already Registered';
+      registerButton.disabled = true;
+    } else {
+      document.getElementById('statusMessage').textContent = '';
+      document.getElementById('statusMessage').classList.add('hidden');
+      registerButton.textContent = 'Register';
+      registerButton.disabled = false;
     }
+  } catch (error) {
+    console.error('Registration Status Error: ', error.message);
+    document.getElementById('statusMessage').textContent = 'Error checking registration status: ' + error.message;
+    document.getElementById('statusMessage').classList.remove('hidden');
+  }
+}
+
 
     async function startDataUpdates() {
       setInterval(() => {
