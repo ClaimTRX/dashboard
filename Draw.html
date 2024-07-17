@@ -204,7 +204,7 @@
         <div class="card-text-section">
           <h5 class="card-title">TRC20 Draw</h5>
           <div id="warningMessage" class="card-text" style="color: red; display: none;">To register, please have 100 CFT unstaked in your wallet.</div>
-          <div id="registeredMessage" class="card-text" style="color: green; display: none;">You are already registered for this draw.</div>
+          <div id="statusMessage" class="card-text hidden" style="color: green;"></div>
           <div id="timer">Next draw in: --:--:--</div>
           <div id="prizeAmount">Current prize: 50 USDT</div> <!-- Manually change token amount and name here -->
           <button id="register-button" class="btn btn-success" disabled>Register</button>
@@ -1050,7 +1050,7 @@
     async function updateUI() {
       try {
         await checkCFTTokenBalance();
-        await checkUserRegistered();
+        await checkRegistrationStatus(userAddress);
         startDataUpdates();
       } catch (error) {
         console.error('Error updating UI:', error);
@@ -1072,26 +1072,32 @@
       }
     }
 
-    async function checkUserRegistered() {
-  try {
-    const hasRegistered = await trc20DrawContract.methods.hasRegistered(userAddress).call();
-    if (hasRegistered) {
-      document.getElementById('registeredMessage').style.display = 'block';
-      document.getElementById('register-button').disabled = true;
-    } else {
-      document.getElementById('registeredMessage').style.display = 'none';
-      document.getElementById('register-button').disabled = false;
+    async function checkRegistrationStatus(walletAddress) {
+      try {
+        const isRegistered = await trc20DrawContract.methods.hasRegistered(walletAddress).call();
+        const registerButton = document.getElementById('register-button');
+        if (isRegistered) {
+          document.getElementById('statusMessage').textContent = 'You are already registered for this draw.';
+          document.getElementById('statusMessage').classList.remove('hidden');
+          registerButton.textContent = 'Already Registered';
+          registerButton.disabled = true;
+        } else {
+          document.getElementById('statusMessage').textContent = '';
+          document.getElementById('statusMessage').classList.add('hidden');
+          registerButton.textContent = 'Register';
+          registerButton.disabled = false;
+        }
+      } catch (error) {
+        console.error('Registration Status Error: ', error.message);
+        document.getElementById('statusMessage').textContent = 'Error checking registration status: ' + error.message;
+        document.getElementById('statusMessage').classList.remove('hidden');
+      }
     }
-  } catch (error) {
-    console.error('Error checking user registration status:', error);
-  }
-}
-
 
     async function startDataUpdates() {
       setInterval(() => {
         updateTimer();
-        checkUserRegistered();
+        checkRegistrationStatus(userAddress);
       }, 1000);
     }
 
