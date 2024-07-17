@@ -1073,18 +1073,20 @@
     }
 
     async function checkUserRegistered() {
-      try {
-        const hasRegistered = await trc20DrawContract.methods.hasRegistered(userAddress).call();
-        if (isRegistered) {
-          document.getElementById('registeredMessage').style.display = 'block';
-          document.getElementById('register-button').disabled = true;
-        } else {
-          document.getElementById('registeredMessage').style.display = 'none';
-        }
-      } catch (error) {
-        console.error('Error checking user registration status:', error);
-      }
+  try {
+    const hasRegistered = await trc20DrawContract.methods.hasRegistered(userAddress).call();
+    if (hasRegistered) {
+      document.getElementById('registeredMessage').style.display = 'block';
+      document.getElementById('register-button').disabled = true;
+    } else {
+      document.getElementById('registeredMessage').style.display = 'none';
+      document.getElementById('register-button').disabled = false;
     }
+  } catch (error) {
+    console.error('Error checking user registration status:', error);
+  }
+}
+
 
     async function startDataUpdates() {
       setInterval(() => {
