@@ -1074,7 +1074,7 @@
 
     async function checkUserRegistered() {
       try {
-        const isRegistered = await trc20DrawContract.methods.isRegistered(userAddress).call();
+        const hasRegistered = await trc20DrawContract.methods.hasRegistered(userAddress).call();
         if (isRegistered) {
           document.getElementById('registeredMessage').style.display = 'block';
           document.getElementById('register-button').disabled = true;
