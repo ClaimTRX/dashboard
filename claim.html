@@ -124,23 +124,30 @@
     }
 
     .listing button {
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.875rem;
-      padding: 8px 16px;
-      margin-top: 10px;
-      width: 20%; /* Adjust width */
-    }
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 8px 16px;
+  width: 100%; /* Adjust width for better appearance */
+  margin-top: 10px; /* Add some margin to space them out */
+}
 
     .listing .btn-success {
-      background-color: #4CAF50;
-    }
-
+  background-color: #4CAF50;
+}
     .listing .btn-danger {
-      background-color: #ff4c4c;
-    }
+  background-color: #ff4c4c;
+}
 
+    /* Mobile responsiveness */
+@media (max-width: 767.98px) {
+  .listing button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    width: 100%; /* Full width for mobile */
+  }
+}
     @media (min-width: 768px) {
       .card-body {
         flex-direction: row;
@@ -1285,6 +1292,7 @@ The energy costs are:<br>
             if (listing.isActive) {
                 const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
                 const totalPrice = tronWeb.fromSun(listing.priceInTRX);
+                const isSeller = listing.seller.toLowerCase() === userAddress.toLowerCase();
 
                 const listingElement = document.createElement('div');
                 listingElement.className = 'listing';
@@ -1292,8 +1300,8 @@ The energy costs are:<br>
                     <p>Seller: ${listing.seller}</p>
                     <p>Token Amount: ${tokenAmount}</p>
                     <p>Total Price: ${totalPrice} TRX</p>
-                    <button class="btn btn-success" onclick="buyToken(${listingId}, ${totalPrice})">Buy</button>
-                    <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
+                    <button class="btn btn-success mb-2" onclick="buyToken(${listingId}, ${totalPrice})">Buy</button>
+                    ${isSeller ? `<button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>` : ''}
                 `;
                 listingsContainer.appendChild(listingElement);
             }
@@ -1303,6 +1311,7 @@ The energy costs are:<br>
         alert('Failed to fetch listings.');
     }
 }
+
 
 async function buyToken(listingId, totalPrice) {
     try {
