@@ -1343,6 +1343,7 @@ async function initializeTronWeb() {
 async function updateUI() {
   try {
     await checkCFTTokenBalance();
+    await checkRegistrationStatus();
     startDataUpdates();
   } catch (error) {
     console.error('Error updating UI:', error);
@@ -1378,6 +1379,29 @@ async function checkCFTTokenBalance() {
   }
 }
 
+async function checkRegistrationStatus() {
+  try {
+    const isRegisteredTRC20 = await trc20DrawContract.methods.hasRegistered(userAddress).call();
+    const isRegisteredTRX = await trxDrawContract.methods.hasRegistered(userAddress).call();
+
+    if (isRegisteredTRC20) {
+      document.getElementById('trc20RegisterButton').innerText = 'Registered';
+      document.getElementById('trc20RegisterButton').disabled = true;
+    } else {
+      document.getElementById('trc20RegisterButton').innerText = 'Register';
+    }
+
+    if (isRegisteredTRX) {
+      document.getElementById('trxRegisterButton').innerText = 'Registered';
+      document.getElementById('trxRegisterButton').disabled = true;
+    } else {
+      document.getElementById('trxRegisterButton').innerText = 'Register';
+    }
+  } catch (error) {
+    console.error('Error checking registration status:', error);
+  }
+}
+
 async function startDataUpdates() {
   setInterval(() => {
     updateTimerTRC20();
@@ -1387,8 +1411,8 @@ async function startDataUpdates() {
 
 async function updateTimerTRC20() {
   try {
-    const lastDrawTime = parseInt(await trc20DrawContract.lastDrawTime().call());
-    const interval = parseInt(await trc20DrawContract.interval().call());
+    const lastDrawTime = parseInt(await trc20DrawContract.methods.lastDrawTime().call());
+    const interval = parseInt(await trc20DrawContract.methods.interval().call());
     const currentTime = Math.floor(Date.now() / 1000);
     const timeLeft = lastDrawTime + interval - currentTime;
 
@@ -1411,8 +1435,8 @@ async function updateTimerTRC20() {
 
 async function updateTimerTRX() {
   try {
-    const lastDrawTime = parseInt(await trxDrawContract.lastDrawTime().call());
-    const interval = parseInt(await trxDrawContract.interval().call());
+    const lastDrawTime = parseInt(await trxDrawContract.methods.lastDrawTime().call());
+    const interval = parseInt(await trxDrawContract.methods.interval().call());
     const currentTime = Math.floor(Date.now() / 1000);
     const timeLeft = lastDrawTime + interval - currentTime;
 
@@ -1435,7 +1459,7 @@ async function updateTimerTRX() {
 
 document.getElementById('trc20RegisterButton').addEventListener('click', async () => {
   try {
-    await trc20DrawContract.register().send();
+    await trc20DrawContract.methods.register().send();
     alert('Registered successfully!');
     updateUI();
   } catch (error) {
@@ -1446,7 +1470,7 @@ document.getElementById('trc20RegisterButton').addEventListener('click', async (
 
 document.getElementById('trc20DrawButton').addEventListener('click', async () => {
   try {
-    await trc20DrawContract.draw().send();
+    await trc20DrawContract.methods.draw().send();
     alert('Draw executed successfully!');
     updateUI();
   } catch (error) {
@@ -1457,7 +1481,7 @@ document.getElementById('trc20DrawButton').addEventListener('click', async () =>
 
 document.getElementById('trxRegisterButton').addEventListener('click', async () => {
   try {
-    await trxDrawContract.register().send();
+    await trxDrawContract.methods.register().send();
     alert('Registered successfully!');
     updateUI();
   } catch (error) {
@@ -1468,7 +1492,7 @@ document.getElementById('trxRegisterButton').addEventListener('click', async () 
 
 document.getElementById('trxDrawButton').addEventListener('click', async () => {
   try {
-    await trxDrawContract.draw().send();
+    await trxDrawContract.methods.draw().send();
     alert('Draw executed successfully!');
     updateUI();
   } catch (error) {
