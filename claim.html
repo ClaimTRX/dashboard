@@ -1363,16 +1363,25 @@ The energy costs are:<br>
         }
     }
 
-    async function buyToken(listingId) {
+   async function buyToken(listingId) {
     try {
         const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
         const listing = await marketplaceContract.methods.listings(listingId).call();
+        
+        // Token amount and price in listing are already in base units
+        const tokenDecimals = 6; // Assuming token has 6 decimals
+        const totalPriceInTRX = listing.priceInTRX;
+        const totalTokenAmount = listing.tokenAmount;
+
+        // Calculate price per token in TRX
+        const pricePerToken = totalPriceInTRX / totalTokenAmount;
+
+        // Calculate total price for the amount user wants to buy
         const adjustedBuyAmount = tronWeb.toSun(buyAmount);
-        const tokenDecimals = 6; // Assume token has 6 decimals
-        const totalPrice = (listing.priceInTRX / Math.pow(10, tokenDecimals)) * adjustedBuyAmount;
+        const totalPrice = (pricePerToken / Math.pow(10, tokenDecimals)) * buyAmount;
 
         await marketplaceContract.methods.buyToken(listingId, adjustedBuyAmount).send({
-            callValue: totalPrice
+            callValue: tronWeb.toSun(totalPrice)
         });
 
         alert('Token purchased successfully!');
@@ -1382,6 +1391,7 @@ The energy costs are:<br>
         alert('Failed to buy tokens.');
     }
 }
+
 
     async function cancelListing(listingId) {
         try {
