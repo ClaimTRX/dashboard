@@ -1269,23 +1269,8 @@ The energy costs are:<br>
       setTimeout(refreshUI, 3000);
     }
 
-    async function approveAndListTokens(tokenAmount, priceInTRX) {
-      const adjustedTokenAmount = tronWeb.toSun(tokenAmount);
-      const adjustedPriceInTRX = tronWeb.toSun(priceInTRX);
-
-      try {
-        await tokenContract.methods.approve(marketplaceContractAddress, adjustedTokenAmount).send();
-        await marketplaceContract.methods.listToken(adjustedTokenAmount, adjustedPriceInTRX).send();
-        alert('Tokens listed successfully!');
-        fetchMarketplaceListings();
-      } catch (error) {
-        console.error(error);
-        alert('Failed to list tokens.');
-      }
-    }
-
     async function fetchMarketplaceListings() {
-      try {
+    try {
         const result = await marketplaceContract.methods.getActiveListings().call();
         const listingIds = result[0];
         const listings = result[1];
@@ -1294,57 +1279,71 @@ The energy costs are:<br>
         listingsContainer.innerHTML = '';
 
         for (let i = 0; i < listingIds.length; i++) {
-          const listingId = listingIds[i];
-          const listing = listings[i];
+            const listingId = listingIds[i];
+            const listing = listings[i];
 
-          if (listing.isActive) {
-            const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
-            const totalPrice = tronWeb.fromSun(listing.priceInTRX);
+            if (listing.isActive) {
+                const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
+                const totalPrice = tronWeb.fromSun(listing.priceInTRX);
 
-            const listingElement = document.createElement('div');
-            listingElement.className = 'listing';
-            listingElement.innerHTML = `
-              <p>Seller: ${listing.seller}</p>
-              <p>Token Amount: ${tokenAmount}</p>
-              <p>Total Price: ${totalPrice} TRX</p>
-              <button class="btn btn-success" onclick="buyToken(${listingId})">Buy</button>
-              <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
-            `;
-            listingsContainer.appendChild(listingElement);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-        alert('Failed to fetch listings.');
-      }
-    }
-
-    async function buyToken(listingId) {
-            try {
-                const listing = await contract.methods.listings(listingId).call();
-                await contract.methods.buyToken(listingId).send({
-                    from: tronWeb.defaultAddress.base58,
-                    callValue: listing.priceInTRX
-                });
-                alert('Token purchased successfully!');
-                fetchListings();
-            } catch (error) {
-                console.error('Error buying token:', error);
-                alert('Failed to buy tokens.');
+                const listingElement = document.createElement('div');
+                listingElement.className = 'listing';
+                listingElement.innerHTML = `
+                    <p>Seller: ${listing.seller}</p>
+                    <p>Token Amount: ${tokenAmount}</p>
+                    <p>Total Price: ${totalPrice} TRX</p>
+                    <button class="btn btn-success" onclick="buyToken(${listingId}, ${totalPrice})">Buy</button>
+                    <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
+                `;
+                listingsContainer.appendChild(listingElement);
             }
         }
-    
+    } catch (error) {
+        console.error(error);
+        alert('Failed to fetch listings.');
+    }
+}
 
-    async function cancelListing(listingId) {
-      try {
+async function buyToken(listingId, totalPrice) {
+    try {
+        await marketplaceContract.methods.buyToken(listingId).send({
+            callValue: tronWeb.toSun(totalPrice)
+        });
+
+        alert('Token purchased successfully!');
+        fetchMarketplaceListings();
+    } catch (error) {
+        console.error('Error buying token:', error);
+        alert('Failed to buy tokens.');
+    }
+}
+
+async function cancelListing(listingId) {
+    try {
         await marketplaceContract.methods.cancelListing(listingId).send();
         alert('Listing cancelled successfully!');
         fetchMarketplaceListings();
-      } catch (error) {
+    } catch (error) {
         console.error('Error cancelling listing:', error);
         alert('Failed to cancel listing.');
-      }
     }
+}
+
+async function approveAndListTokens(tokenAmount, priceInTRX) {
+    const adjustedTokenAmount = tronWeb.toSun(tokenAmount);
+    const adjustedPriceInTRX = tronWeb.toSun(priceInTRX);
+
+    try {
+        await tokenContract.methods.approve(marketplaceContractAddress, adjustedTokenAmount).send();
+        await marketplaceContract.methods.listToken(adjustedTokenAmount, adjustedPriceInTRX).send();
+        alert('Tokens listed successfully!');
+        fetchMarketplaceListings();
+    } catch (error) {
+        console.error(error);
+        alert('Failed to list tokens.');
+    }
+}
+
 
     async function connectWallet() {
       if (await checkTronLinkInstalled()) {
