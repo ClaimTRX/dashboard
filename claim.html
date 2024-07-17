@@ -1476,13 +1476,13 @@ async function fetchMarketplaceListings() {
 async function buyToken(listingId) {
     try {
         const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
-        const listing = await marketplaceContract.methods.listings(listingId).call();
+        const listing = await marketplaceContract.methods.getListing(listingId).call();
 
-        const pricePerToken = tronWeb.fromSun(listing.pricePerTokenInTRX);
+        const pricePerToken = listing.pricePerTokenInTRX;
         const totalPrice = pricePerToken * buyAmount;
 
-        await marketplaceContract.methods.buyToken(listingId, tronWeb.toSun(buyAmount)).send({
-            callValue: tronWeb.toSun(totalPrice)
+        await marketplaceContract.methods.buyToken(listingId, buyAmount).send({
+            callValue: totalPrice
         });
 
         alert('Token purchased successfully!');
@@ -1492,6 +1492,7 @@ async function buyToken(listingId) {
         alert('Failed to buy tokens.');
     }
 }
+
 
 async function cancelListing(listingId) {
     try {
