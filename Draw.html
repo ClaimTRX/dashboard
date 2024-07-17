@@ -205,9 +205,7 @@
           <h5 class="card-title">TRC20 Draw</h5>
           <div id="warningMessage" class="card-text" style="color: red; display: none;">To register, please have 100 CFT unstaked in your wallet.</div>
           <div id="timer">Next draw in: --:--:--</div>
-          <div id="prizeAmount">Current prize: 0 TOKEN</div>
-          <input type="text" id="manualTokenName" placeholder="Enter token name" class="form-control">
-          <input type="number" id="manualPrizeAmount" placeholder="Enter prize amount" class="form-control">
+          <div id="prizeAmount">Current prize: 50 USDT</div> <!-- Manually change token amount and name here -->
           <button id="register-button" class="btn btn-success" disabled>Register</button>
           <button id="draw-button" class="btn btn-primary" disabled>Draw</button>
         </div>
@@ -1063,11 +1061,9 @@
         if (tronWeb.toDecimal(balance) >= 100 * 10 ** 6) { // Assuming CFT has 6 decimals
           document.getElementById('warningMessage').style.display = 'none';
           document.getElementById('register-button').disabled = false;
-          document.getElementById('draw-amount').disabled = false;
         } else {
           document.getElementById('warningMessage').style.display = 'block';
           document.getElementById('register-button').disabled = true;
-          document.getElementById('draw-amount').disabled = true;
         }
       } catch (error) {
         console.error('Error checking CFT token balance:', error);
@@ -1134,4 +1130,3 @@
   </script>
 </body>
 </html>
-
