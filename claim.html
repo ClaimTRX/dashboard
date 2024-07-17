@@ -252,8 +252,7 @@ The energy costs are:<br>
           <p class="card-text">List or Buy CFT Tokens</p>
           <input type="number" id="tokenAmount" class="form-control" placeholder="Amount of Tokens">
           <input type="number" id="priceInTRX" class="form-control" placeholder="Price in TRX">
-          <button id="approveTokenButton" class="btn btn-primary">Approve Token</button>
-          <button id="listTokenButton" class="btn btn-success" style="display:none;">List Tokens</button>
+          <button id="approveAndListButton" class="btn btn-success">Approve and List</button>
         </div>
         <div class="card-explanation">
           <p>Approve the tokens you want to list on the marketplace. Once approved, you can list them for sale at your desired price.</p>
@@ -261,7 +260,7 @@ The energy costs are:<br>
       </div>
       <div class="card mt-4">
         <div class="card-body">
-          <h5 class="card-title">Marketplace Listings</h5>
+          <h5 class="card-title">Listed for Sale</h5>
           <div id="listings" class="card-text">Loading...</div>
         </div>
       </div>
@@ -273,6 +272,11 @@ The energy costs are:<br>
   <script>
     let tronWeb, userAddress, stakingContract, tokenContract, buyCftContract, marketplaceContract;
     const stakingContractAddress = 'TVSMKqBk12161JDAQBh9pkdxMAgCtuGrdA';
+    const tokenContractAddress = 'TAQzALyftaynnr3VG3rCvzkY2KouFH79sA';
+    const buyCftContractAddress = 'TNd9QQNUUENTQWCs81yan3ttzahQXHJhAC';
+    const marketplaceContractAddress = 'TECgtbN62yk8xCXYKbm3CWw9BjGrkw3DGF';
+    const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
     const stakingContractAbi = [
             {
                 "inputs": [
@@ -1132,9 +1136,9 @@ The energy costs are:<br>
     }
 
     async function updateTotalStakedAmount() {
-    const totalStakedAmount = await stakingContract.methods.viewTotalStaked().call();
-    document.getElementById('total-staked-amount').innerText = formatNumber(tronWeb.fromSun(totalStakedAmount)) + ' CFT';
-}
+        const totalStakedAmount = await stakingContract.methods.viewTotalStaked().call();
+        document.getElementById('total-staked-amount').innerText = formatNumber(tronWeb.fromSun(totalStakedAmount)) + ' CFT';
+    }
 
     async function updateAPR() {
         const currentAPR = await stakingContract.methods.viewAPR().call();
@@ -1207,26 +1211,15 @@ The energy costs are:<br>
             }
         });
 
-        document.getElementById('approveTokenButton').addEventListener('click', async () => {
-            const tokenAmount = document.getElementById('tokenAmount').value;
-            if (tokenAmount) {
-                try {
-                    await approveTokens(tokenAmount);
-                } catch (error) {
-                    console.error('Error approving tokens:', error);
-                }
-            }
-        });
-
-        document.getElementById('listTokenButton').addEventListener('click', async () => {
+        document.getElementById('approveAndListButton').addEventListener('click', async () => {
             const tokenAmount = document.getElementById('tokenAmount').value;
             const priceInTRX = document.getElementById('priceInTRX').value;
             if (tokenAmount && priceInTRX) {
                 try {
-                    await listTokens(tokenAmount, priceInTRX);
+                    await approveAndListTokens(tokenAmount, priceInTRX);
                     setTimeout(refreshUI, 3000);
                 } catch (error) {
-                    console.error('Error listing tokens:', error);
+                    console.error('Error approving and listing tokens:', error);
                 }
             }
         });
@@ -1235,7 +1228,6 @@ The energy costs are:<br>
     async function stakeTokens(amount) {
         const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
         const amountToStake = tronWeb.toSun(amount);
-        const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
         if (allowance < amountToStake) {
             await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
@@ -1247,7 +1239,7 @@ The energy costs are:<br>
     }
 
     async function unstakeTokens() {
-        const unstakeAmount = document.getElementById('stake-amount').value; // or another element for the unstake amount if different
+        const unstakeAmount = document.getElementById('stake-amount').value;
         await stakingContract.methods.withdraw(tronWeb.toSun(unstakeAmount)).send();
         const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
         document.getElementById('staked-amount').innerText = formatNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
@@ -1268,52 +1260,34 @@ The energy costs are:<br>
     }
 
     async function compoundRewards() {
-        // Claim rewards
         await stakingContract.methods.claimReward().send();
         const claimableRewards = await stakingContract.methods.viewPendingReward(userAddress).call();
 
-        // Use rewards to buy tokens
         await buyCftContract.methods.buyTokens().send({
             callValue: claimableRewards
         });
 
-        // Update the UI
         setTimeout(refreshUI, 3000);
     }
 
-    async function approveTokens(amount) {
+    async function approveAndListTokens(amount, price) {
         const adjustedTokenAmount = tronWeb.toSun(amount);
+        const adjustedPriceInTRX = tronWeb.toSun(price);
 
         try {
-            await tokenContract.methods.approve(marketplaceContractAddress, adjustedTokenAmount).send();
-            alert('Tokens approved successfully!');
-            document.getElementById('listTokenButton').style.display = 'block';
+            const allowance = await tokenContract.methods.allowance(userAddress, marketplaceContractAddress).call();
+            if (allowance < adjustedTokenAmount) {
+                await tokenContract.methods.approve(marketplaceContractAddress, maxUint256).send();
+            }
+
+            await marketplaceContract.methods.listToken(adjustedTokenAmount, adjustedPriceInTRX).send();
+            alert('Tokens approved and listed successfully!');
+            fetchMarketplaceListings();
         } catch (error) {
             console.error(error);
-            alert('Failed to approve tokens.');
+            alert('Failed to approve and list tokens.');
         }
     }
-
-    async function listTokens(amount, price) {
-    const adjustedTokenAmount = tronWeb.toSun(amount);
-    const adjustedPriceInTRX = tronWeb.toSun(price);
-    const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-
-    try {
-        const allowance = await tokenContract.methods.allowance(userAddress, marketplaceContractAddress).call();
-        if (allowance < adjustedTokenAmount) {
-            await tokenContract.methods.approve(marketplaceContractAddress, maxUint256).send();
-        }
-
-        await marketplaceContract.methods.listToken(adjustedTokenAmount, adjustedPriceInTRX).send();
-        alert('Tokens listed successfully!');
-        fetchMarketplaceListings();
-    } catch (error) {
-        console.error(error);
-        alert('Failed to list tokens.');
-    }
-}
-
 
     async function fetchMarketplaceListings() {
         try {
@@ -1338,8 +1312,9 @@ The energy costs are:<br>
                         <p>Seller: ${listing.seller}</p>
                         <p>Token Amount: ${tokenAmount}</p>
                         <p>Price: ${priceInTRX} TRX</p>
-                        <button onclick="buyToken(${listingId}, ${tokenAmount})">Buy</button>
-                        <button onclick="cancelListing(${listingId})">Cancel</button>
+                        <input type="number" class="form-control" placeholder="Amount to buy" id="buyAmount-${listingId}">
+                        <button onclick="buyToken(${listingId}, ${tokenAmount})" class="btn btn-success">Buy</button>
+                        <button onclick="cancelListing(${listingId})" class="btn btn-danger">Cancel</button>
                     `;
                     listingsContainer.appendChild(listingElement);
                 }
@@ -1352,10 +1327,12 @@ The energy costs are:<br>
 
     async function buyToken(listingId, tokenAmount) {
         try {
+            const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
             const listing = await marketplaceContract.methods.listings(listingId).call();
-            const totalPrice = tronWeb.toSun((listing.priceInTRX / listing.tokenAmount) * tokenAmount);
+            const adjustedBuyAmount = tronWeb.toSun(buyAmount);
+            const totalPrice = tronWeb.toSun((listing.priceInTRX / listing.tokenAmount) * adjustedBuyAmount);
 
-            await marketplaceContract.methods.buyToken(listingId, tronWeb.toSun(tokenAmount)).send({
+            await marketplaceContract.methods.buyToken(listingId, adjustedBuyAmount).send({
                 callValue: totalPrice
             });
 
