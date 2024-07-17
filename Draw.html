@@ -204,6 +204,7 @@
         <div class="card-text-section">
           <h5 class="card-title">TRC20 Draw</h5>
           <div id="warningMessage" class="card-text" style="color: red; display: none;">To register, please have 100 CFT unstaked in your wallet.</div>
+          <div id="registeredMessage" class="card-text" style="color: green; display: none;">You are already registered for this draw.</div>
           <div id="timer">Next draw in: --:--:--</div>
           <div id="prizeAmount">Current prize: 50 USDT</div> <!-- Manually change token amount and name here -->
           <button id="register-button" class="btn btn-success" disabled>Register</button>
@@ -1040,15 +1041,16 @@
         trc20DrawContract = await tronWeb.contract(trc20DrawContractAbi, trc20DrawContractAddress);
         cftTokenContract = await tronWeb.contract(cftTokenContractAbi, cftTokenAddress);
 
-        updateUI(balance);
+        updateUI();
       } catch (error) {
         console.error('Error fetching balance:', error);
       }
     }
 
-    async function updateUI(balance) {
+    async function updateUI() {
       try {
         await checkCFTTokenBalance();
+        await checkUserRegistered();
         startDataUpdates();
       } catch (error) {
         console.error('Error updating UI:', error);
@@ -1070,9 +1072,24 @@
       }
     }
 
+    async function checkUserRegistered() {
+      try {
+        const isRegistered = await trc20DrawContract.methods.isRegistered(userAddress).call();
+        if (isRegistered) {
+          document.getElementById('registeredMessage').style.display = 'block';
+          document.getElementById('register-button').disabled = true;
+        } else {
+          document.getElementById('registeredMessage').style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error checking user registration status:', error);
+      }
+    }
+
     async function startDataUpdates() {
       setInterval(() => {
         updateTimer();
+        checkUserRegistered();
       }, 1000);
     }
 
@@ -1104,6 +1121,7 @@
       try {
         await trc20DrawContract.methods.register().send();
         alert('Registered successfully!');
+        updateUI();
       } catch (error) {
         console.error('Error registering:', error);
         alert('Error registering: ' + error.message);
@@ -1114,6 +1132,7 @@
       try {
         await trc20DrawContract.methods.draw().send();
         alert('Draw executed successfully!');
+        updateUI();
       } catch (error) {
         console.error('Error executing draw:', error);
         alert('Error executing draw: ' + error.message);
