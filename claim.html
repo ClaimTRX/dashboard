@@ -1369,28 +1369,26 @@ The energy costs are:<br>
 
 
     async function buyToken(listingId) {
-        try {
-            const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
-            const listing = await marketplaceContract.methods.listings(listingId).call();
-            const tokenDecimals = 6; // Assuming token has 6 decimals
-            const totalPriceInTRX = listing.priceInTRX;
-            const totalTokenAmount = listing.tokenAmount;
+    try {
+        const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
+        const listing = await marketplaceContract.methods.listings(listingId).call();
 
-            const pricePerToken = totalPriceInTRX / totalTokenAmount;
+        const pricePerToken = listing.priceInTRX / listing.tokenAmount;
 
-            const totalPrice = (pricePerToken / Math.pow(10, tokenDecimals)) * buyAmount;
+        const totalPrice = pricePerToken * buyAmount;
 
-            await marketplaceContract.methods.buyToken(listingId, tronWeb.toSun(buyAmount)).send({
-                callValue: tronWeb.toSun(totalPrice)
-            });
+        await marketplaceContract.methods.buyToken(listingId, tronWeb.toSun(buyAmount)).send({
+            callValue: totalPrice
+        });
 
-            alert('Token purchased successfully!');
-            fetchMarketplaceListings();
-        } catch (error) {
-            console.error('Error buying token:', error);
-            alert('Failed to buy tokens.');
-        }
+        alert('Token purchased successfully!');
+        fetchMarketplaceListings();
+    } catch (error) {
+        console.error('Error buying token:', error);
+        alert('Failed to buy tokens.');
     }
+}
+
 
     async function cancelListing(listingId) {
         try {
