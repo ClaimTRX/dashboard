@@ -295,8 +295,10 @@ The energy costs are:<br>
     <!-- Listed for Sale Box -->
     <div class="card mt-4">
       <div class="card-body">
-        <h5 class="card-title">Listed for Sale</h5>
-        <div id="listings" class="card-text">Loading...</div>
+        <div class="card-text-section">
+          <h5 class="card-title">Listed for Sale</h5>
+          <div id="listings" class="card-text">Loading...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -310,6 +312,7 @@ The energy costs are:<br>
     const buyCftContractAddress = 'TNd9QQNUUENTQWCs81yan3ttzahQXHJhAC';
     const marketplaceContractAddress = 'TECgtbN62yk8xCXYKbm3CWw9BjGrkw3DGF';
     const maxUint256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
 
     const stakingContractAbi = [
             {
@@ -1361,23 +1364,24 @@ The energy costs are:<br>
     }
 
     async function buyToken(listingId) {
-        try {
-            const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
-            const listing = await marketplaceContract.methods.listings(listingId).call();
-            const adjustedBuyAmount = tronWeb.toSun(buyAmount);
-            const totalPrice = tronWeb.toSun((listing.priceInTRX / listing.tokenAmount) * adjustedBuyAmount);
+    try {
+        const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
+        const listing = await marketplaceContract.methods.listings(listingId).call();
+        const adjustedBuyAmount = tronWeb.toSun(buyAmount);
+        const tokenDecimals = 6; // Assume token has 6 decimals
+        const totalPrice = (listing.priceInTRX / Math.pow(10, tokenDecimals)) * adjustedBuyAmount;
 
-            await marketplaceContract.methods.buyToken(listingId, adjustedBuyAmount).send({
-                callValue: totalPrice
-            });
+        await marketplaceContract.methods.buyToken(listingId, adjustedBuyAmount).send({
+            callValue: totalPrice
+        });
 
-            alert('Token purchased successfully!');
-            fetchMarketplaceListings();
-        } catch (error) {
-            console.error('Error buying token:', error);
-            alert('Failed to buy tokens.');
-        }
+        alert('Token purchased successfully!');
+        fetchMarketplaceListings();
+    } catch (error) {
+        console.error('Error buying token:', error);
+        alert('Failed to buy tokens.');
     }
+}
 
     async function cancelListing(listingId) {
         try {
@@ -1419,6 +1423,6 @@ The energy costs are:<br>
     function formatAPR(apr) {
         return (parseFloat(apr) / 10000).toFixed(2);
     }
-</script>
+  </script>
 </body>
 </html>
