@@ -991,6 +991,112 @@ The energy costs are:<br>
         "type": "constructor"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "listingId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "seller",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pricePerTokenInTRX",
+                "type": "uint256"
+            }
+        ],
+        "name": "NewListing",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "listingId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "buyer",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "seller",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "priceInTRX",
+                "type": "uint256"
+            }
+        ],
+        "name": "TokenBought",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "listingId",
+                "type": "uint256"
+            }
+        ],
+        "name": "ListingRemoved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "listingId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "remainingTokenAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "partialFillAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "ListingPartiallyFilled",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",
@@ -1114,114 +1220,9 @@ The energy costs are:<br>
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "listingId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "seller",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "tokenAmount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "pricePerTokenInTRX",
-                "type": "uint256"
-            }
-        ],
-        "name": "NewListing",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "listingId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "buyer",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "seller",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "tokenAmount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "priceInTRX",
-                "type": "uint256"
-            }
-        ],
-        "name": "TokenBought",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "listingId",
-                "type": "uint256"
-            }
-        ],
-        "name": "ListingRemoved",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "listingId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "remainingTokenAmount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "partialFillAmount",
-                "type": "uint256"
-            }
-        ],
-        "name": "ListingPartiallyFilled",
-        "type": "event"
     }
 ]
+
 
  document.addEventListener('DOMContentLoaded', async () => {
     if (await checkTronLinkInstalled()) {
@@ -1476,13 +1477,13 @@ async function fetchMarketplaceListings() {
 async function buyToken(listingId) {
     try {
         const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
-        const listing = await marketplaceContract.methods.getListing(listingId).call();
+        const listing = await marketplaceContract.methods.listings(listingId).call();
 
-        const pricePerToken = listing.pricePerTokenInTRX;
+        const pricePerToken = tronWeb.fromSun(listing.pricePerTokenInTRX);
         const totalPrice = pricePerToken * buyAmount;
 
-        await marketplaceContract.methods.buyToken(listingId, buyAmount).send({
-            callValue: totalPrice
+        await marketplaceContract.methods.buyToken(listingId, tronWeb.toSun(buyAmount)).send({
+            callValue: tronWeb.toSun(totalPrice)
         });
 
         alert('Token purchased successfully!');
@@ -1492,7 +1493,6 @@ async function buyToken(listingId) {
         alert('Failed to buy tokens.');
     }
 }
-
 
 async function cancelListing(listingId) {
     try {
