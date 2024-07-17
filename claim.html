@@ -321,6 +321,7 @@ The energy costs are:<br>
 
 
 
+
     const stakingContractAbi = [
             {
                 "inputs": [
@@ -1292,7 +1293,7 @@ The energy costs are:<br>
     }
 
     async function fetchMarketplaceListings() {
-    try {
+      try {
         const result = await marketplaceContract.methods.getActiveListings().call();
         const listingIds = result[0];
         const listings = result[1];
@@ -1301,69 +1302,60 @@ The energy costs are:<br>
         listingsContainer.innerHTML = '';
 
         for (let i = 0; i < listingIds.length; i++) {
-            const listingId = listingIds[i];
-            const listing = listings[i];
+          const listingId = listingIds[i];
+          const listing = listings[i];
 
-            if (listing.isActive) {
-                const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
-                const pricePerToken = tronWeb.fromSun(listing.priceInTRX);
+          if (listing.isActive) {
+            const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
+            const pricePerToken = tronWeb.fromSun(listing.priceInTRX);
+            const totalPrice = tronWeb.fromSun(listing.tokenAmount * listing.priceInTRX);
 
-                const listingElement = document.createElement('div');
-                listingElement.className = 'listing';
-                listingElement.innerHTML = `
-                    <p>Seller: ${listing.seller}</p>
-                    <p>Token Amount: ${tokenAmount}</p>
-                    <p>Price per Token: ${pricePerToken} TRX</p>
-                    <input type="number" id="buyAmount-${listingId}" class="form-control" placeholder="Amount to buy">
-                    <button class="btn btn-success" onclick="buyToken(${listingId})">Buy</button>
-                    <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
-                `;
-                listingsContainer.appendChild(listingElement);
-            }
+            const listingElement = document.createElement('div');
+            listingElement.className = 'listing';
+            listingElement.innerHTML = `
+              <p>Seller: ${listing.seller}</p>
+              <p>Token Amount: ${tokenAmount}</p>
+              <p>Price per Token: ${pricePerToken} TRX</p>
+              <p>Total Price: ${totalPrice} TRX</p>
+              <button class="btn btn-success" onclick="buyToken(${listingId})">Buy</button>
+              <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
+            `;
+            listingsContainer.appendChild(listingElement);
+          }
         }
-    } catch (error) {
+      } catch (error) {
         console.error(error);
         alert('Failed to fetch listings.');
+      }
     }
-}
 
-async function buyToken(listingId) {
-    try {
-        const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
-        console.log(`Buy Amount: ${buyAmount}`);
-        
+    async function buyToken(listingId) {
+      try {
         const listing = await marketplaceContract.methods.listings(listingId).call();
-        console.log(`Listing: ${JSON.stringify(listing)}`);
-
-        const pricePerToken = tronWeb.fromSun(listing.priceInTRX);
-        console.log(`Price per Token: ${pricePerToken}`);
-        
-        const totalPrice = pricePerToken * buyAmount;
-        console.log(`Total Price: ${totalPrice}`);
+        const totalPrice = listing.priceInTRX * listing.tokenAmount;
 
         await marketplaceContract.methods.buyToken(listingId).send({
-            callValue: tronWeb.toSun(totalPrice)
+          callValue: totalPrice
         });
 
         alert('Token purchased successfully!');
         fetchMarketplaceListings();
-    } catch (error) {
+      } catch (error) {
         console.error('Error buying token:', error);
         alert('Failed to buy tokens.');
+      }
     }
-}
 
-async function cancelListing(listingId) {
-    try {
+    async function cancelListing(listingId) {
+      try {
         await marketplaceContract.methods.cancelListing(listingId).send();
         alert('Listing cancelled successfully!');
         fetchMarketplaceListings();
-    } catch (error) {
+      } catch (error) {
         console.error('Error cancelling listing:', error);
         alert('Failed to cancel listing.');
+      }
     }
-}
-
 
     async function connectWallet() {
       if (await checkTronLinkInstalled()) {
