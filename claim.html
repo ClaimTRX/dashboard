@@ -123,14 +123,6 @@
       margin-bottom: 15px;
     }
 
-    .listing input[type="number"] {
-      width: 20%; /* Adjust width */
-      padding: 8px;
-      font-size: 0.875rem;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-
     .listing button {
       border: none;
       border-radius: 5px;
@@ -1077,7 +1069,7 @@ The energy costs are:<br>
 }
 ];
 
-    document.addEventListener('DOMContentLoaded', async () => {
+   document.addEventListener('DOMContentLoaded', async () => {
       if (await checkTronLinkInstalled()) {
         await initializeTronWeb();
       }
@@ -1277,13 +1269,13 @@ The energy costs are:<br>
       setTimeout(refreshUI, 3000);
     }
 
-    async function approveAndListTokens(tokenAmount, pricePerTokenInTRX) {
+    async function approveAndListTokens(tokenAmount, priceInTRX) {
       const adjustedTokenAmount = tronWeb.toSun(tokenAmount);
-      const adjustedPricePerTokenInTRX = tronWeb.toSun(pricePerTokenInTRX);
+      const adjustedPriceInTRX = tronWeb.toSun(priceInTRX);
 
       try {
         await tokenContract.methods.approve(marketplaceContractAddress, adjustedTokenAmount).send();
-        await marketplaceContract.methods.listToken(adjustedTokenAmount, adjustedPricePerTokenInTRX).send();
+        await marketplaceContract.methods.listToken(adjustedTokenAmount, adjustedPriceInTRX).send();
         alert('Tokens listed successfully!');
         fetchMarketplaceListings();
       } catch (error) {
@@ -1307,15 +1299,13 @@ The energy costs are:<br>
 
           if (listing.isActive) {
             const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
-            const pricePerToken = tronWeb.fromSun(listing.priceInTRX);
-            const totalPrice = tronWeb.fromSun(listing.tokenAmount * listing.priceInTRX);
+            const totalPrice = tronWeb.fromSun(listing.priceInTRX);
 
             const listingElement = document.createElement('div');
             listingElement.className = 'listing';
             listingElement.innerHTML = `
               <p>Seller: ${listing.seller}</p>
               <p>Token Amount: ${tokenAmount}</p>
-              <p>Price per Token: ${pricePerToken} TRX</p>
               <p>Total Price: ${totalPrice} TRX</p>
               <button class="btn btn-success" onclick="buyToken(${listingId})">Buy</button>
               <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
@@ -1332,7 +1322,7 @@ The energy costs are:<br>
     async function buyToken(listingId) {
       try {
         const listing = await marketplaceContract.methods.listings(listingId).call();
-        const totalPrice = listing.priceInTRX * listing.tokenAmount;
+        const totalPrice = listing.priceInTRX;
 
         await marketplaceContract.methods.buyToken(listingId).send({
           callValue: totalPrice
