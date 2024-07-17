@@ -1476,12 +1476,21 @@ async function fetchMarketplaceListings() {
 
 async function buyToken(listingId) {
     try {
+        // Retrieve the buy amount from the input field
         const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
+        console.log(`Buy Amount: ${buyAmount}`);
+        
+        // Fetch the listing details from the contract
         const listing = await marketplaceContract.methods.listings(listingId).call();
+        console.log(`Listing: ${JSON.stringify(listing)}`);
 
+        // Calculate the price per token and the total price for the purchase
         const pricePerToken = tronWeb.fromSun(listing.pricePerTokenInTRX);
+        console.log(`Price per Token: ${pricePerToken}`);
         const totalPrice = pricePerToken * buyAmount;
+        console.log(`Total Price: ${totalPrice}`);
 
+        // Send the transaction to buy tokens
         await marketplaceContract.methods.buyToken(listingId, tronWeb.toSun(buyAmount)).send({
             callValue: tronWeb.toSun(totalPrice)
         });
