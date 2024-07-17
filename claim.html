@@ -81,7 +81,6 @@
       cursor: pointer;
       font-size: 0.875rem;
       padding: 8px 16px;
-      width: 20%; /* Adjust width */
       margin-top: 10px;
     }
 
@@ -94,7 +93,7 @@
     }
 
     .form-control {
-      width: 20%; /* Adjust width */
+      width: 100%;
       padding: 8px;
       font-size: 0.875rem;
       border-radius: 5px;
@@ -104,6 +103,13 @@
     .card-explanation {
       margin-top: 10px;
       font-size: 0.875rem;
+    }
+
+    .listing {
+      background-color: #1f4068;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
     }
 
     input[type=number] {
@@ -258,11 +264,12 @@ The energy costs are:<br>
           <p>Approve the tokens you want to list on the marketplace. Once approved, you can list them for sale at your desired price.</p>
         </div>
       </div>
-      <div class="card mt-4">
-        <div class="card-body">
-          <h5 class="card-title">Listed for Sale</h5>
-          <div id="listings" class="card-text">Loading...</div>
-        </div>
+    </div>
+    <!-- Listed for Sale Box -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title">Listed for Sale</h5>
+        <div id="listings" class="card-text">Loading...</div>
       </div>
     </div>
   </div>
@@ -1072,7 +1079,7 @@ The energy costs are:<br>
             }
         ];
 
-  document.addEventListener('DOMContentLoaded', async () => {
+ document.addEventListener('DOMContentLoaded', async () => {
         if (await checkTronLinkInstalled()) {
             await initializeTronWeb();
         }
@@ -1103,6 +1110,7 @@ The energy costs are:<br>
             const balance = await tronWeb.trx.getBalance(userAddress);
             console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
+            // Initialize contracts
             stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
             tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
             buyCftContract = await tronWeb.contract(buyCftContractAbi, buyCftContractAddress);
@@ -1313,7 +1321,7 @@ The energy costs are:<br>
                         <p>Token Amount: ${tokenAmount}</p>
                         <p>Price: ${priceInTRX} TRX</p>
                         <input type="number" class="form-control" placeholder="Amount to buy" id="buyAmount-${listingId}">
-                        <button onclick="buyToken(${listingId}, ${tokenAmount})" class="btn btn-success">Buy</button>
+                        <button onclick="buyToken(${listingId})" class="btn btn-success">Buy</button>
                         <button onclick="cancelListing(${listingId})" class="btn btn-danger">Cancel</button>
                     `;
                     listingsContainer.appendChild(listingElement);
@@ -1325,7 +1333,7 @@ The energy costs are:<br>
         }
     }
 
-    async function buyToken(listingId, tokenAmount) {
+    async function buyToken(listingId) {
         try {
             const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
             const listing = await marketplaceContract.methods.listings(listingId).call();
