@@ -979,259 +979,102 @@ The energy costs are:<br>
     ];
 
   
-  const marketplaceContractAbi = [
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "tokenAddress",
-            "type": "address"
-          }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "uint256",
-            "name": "listingId",
-            "type": "uint256"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "seller",
-            "type": "address"
-          },
-          {
-            "indexed": false,
-            "internalType": "uint256",
-            "name": "tokenAmount",
-            "type": "uint256"
-          },
-          {
-            "indexed": false,
-            "internalType": "uint256",
-            "name": "priceInTRX",
-            "type": "uint256"
-          }
-        ],
-        "name": "NewListing",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "uint256",
-            "name": "listingId",
-            "type": "uint256"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "buyer",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "seller",
-            "type": "address"
-          },
-          {
-            "indexed": false,
-            "internalType": "uint256",
-            "name": "tokenAmount",
-            "type": "uint256"
-          },
-          {
-            "indexed": false,
-            "internalType": "uint256",
-            "name": "priceInTRX",
-            "type": "uint256"
-          }
-        ],
-        "name": "TokenBought",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "uint256",
-            "name": "listingId",
-            "type": "uint256"
-          }
-        ],
-        "name": "ListingRemoved",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "uint256",
-            "name": "listingId",
-            "type": "uint256"
-          }
-        ],
-        "name": "ListingCancelled",
-        "type": "event"
-      },
-      {
-        "inputs": [],
-        "name": "nextListingId",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "tokenAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "priceInTRX",
-            "type": "uint256"
-          }
-        ],
-        "name": "listToken",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "listingId",
-            "type": "uint256"
-          }
-        ],
-        "name": "buyToken",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "listingId",
-            "type": "uint256"
-          }
-        ],
-        "name": "cancelListing",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "getActiveListings",
-        "outputs": [
-          {
-            "internalType": "uint256[]",
-            "name": "",
-            "type": "uint256[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "seller",
-                "type": "address"
-              },
-              {
-                "internalType": "uint128",
-                "name": "tokenAmount",
-                "type": "uint128"
-              },
-              {
-                "internalType": "uint128",
-                "name": "priceInTRX",
-                "type": "uint128"
-              },
-              {
-                "internalType": "bool",
-                "name": "isActive",
-                "type": "bool"
-              }
-            ],
-            "internalType": "struct TokenMarketplace.Listing[]",
-            "name": "",
-            "type": "tuple[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "to",
-            "type": "address"
-          }
-        ],
-        "name": "withdrawTRC20",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address payable",
-            "name": "to",
-            "type": "address"
-          }
-        ],
-        "name": "withdrawTRX",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      }
-    ];
+  const marketplaceContractAbi = {
+  "inputs": [
+    {
+      "internalType": "address",
+      "name": "tokenAddress",
+      "type": "address"
+    }
+  ],
+  "stateMutability": "nonpayable",
+  "type": "constructor"
+},
+{
+  "inputs": [
+    {
+      "internalType": "uint256",
+      "name": "tokenAmount",
+      "type": "uint256"
+    },
+    {
+      "internalType": "uint256",
+      "name": "priceInTRX",
+      "type": "uint256"
+    }
+  ],
+  "name": "listToken",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [
+    {
+      "internalType": "uint256",
+      "name": "listingId",
+      "type": "uint256"
+    }
+  ],
+  "name": "buyToken",
+  "outputs": [],
+  "stateMutability": "payable",
+  "type": "function"
+},
+{
+  "inputs": [
+    {
+      "internalType": "uint256",
+      "name": "listingId",
+      "type": "uint256"
+    }
+  ],
+  "name": "cancelListing",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [],
+  "name": "getActiveListings",
+  "outputs": [
+    {
+      "internalType": "uint256[]",
+      "name": "",
+      "type": "uint256[]"
+    },
+    {
+      "components": [
+        {
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "internalType": "uint128",
+          "name": "tokenAmount",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint128",
+          "name": "priceInTRX",
+          "type": "uint128"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        }
+      ],
+      "internalType": "struct TokenMarketplace.Listing[]",
+      "name": "",
+      "type": "tuple[]"
+    }
+  ],
+  "stateMutability": "view",
+  "type": "function"
+}
+
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (await checkTronLinkInstalled()) {
@@ -1449,7 +1292,7 @@ The energy costs are:<br>
     }
 
     async function fetchMarketplaceListings() {
-      try {
+    try {
         const result = await marketplaceContract.methods.getActiveListings().call();
         const listingIds = result[0];
         const listings = result[1];
@@ -1458,34 +1301,34 @@ The energy costs are:<br>
         listingsContainer.innerHTML = '';
 
         for (let i = 0; i < listingIds.length; i++) {
-          const listingId = listingIds[i];
-          const listing = listings[i];
+            const listingId = listingIds[i];
+            const listing = listings[i];
 
-          if (listing.isActive) {
-            const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
-            const pricePerToken = tronWeb.fromSun(listing.priceInTRX);
+            if (listing.isActive) {
+                const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
+                const pricePerToken = tronWeb.fromSun(listing.priceInTRX);
 
-            const listingElement = document.createElement('div');
-            listingElement.className = 'listing';
-            listingElement.innerHTML = `
-              <p>Seller: ${listing.seller}</p>
-              <p>Token Amount: ${tokenAmount}</p>
-              <p>Price per Token: ${pricePerToken} TRX</p>
-              <input type="number" id="buyAmount-${listingId}" class="form-control" placeholder="Amount to buy">
-              <button class="btn btn-success" onclick="buyToken(${listingId})">Buy</button>
-              <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
-            `;
-            listingsContainer.appendChild(listingElement);
-          }
+                const listingElement = document.createElement('div');
+                listingElement.className = 'listing';
+                listingElement.innerHTML = `
+                    <p>Seller: ${listing.seller}</p>
+                    <p>Token Amount: ${tokenAmount}</p>
+                    <p>Price per Token: ${pricePerToken} TRX</p>
+                    <input type="number" id="buyAmount-${listingId}" class="form-control" placeholder="Amount to buy">
+                    <button class="btn btn-success" onclick="buyToken(${listingId})">Buy</button>
+                    <button class="btn btn-danger" onclick="cancelListing(${listingId})">Cancel</button>
+                `;
+                listingsContainer.appendChild(listingElement);
+            }
         }
-      } catch (error) {
+    } catch (error) {
         console.error(error);
         alert('Failed to fetch listings.');
-      }
     }
+}
 
-    async function buyToken(listingId) {
-      try {
+async function buyToken(listingId) {
+    try {
         const buyAmount = document.getElementById(`buyAmount-${listingId}`).value;
         console.log(`Buy Amount: ${buyAmount}`);
         
@@ -1499,27 +1342,28 @@ The energy costs are:<br>
         console.log(`Total Price: ${totalPrice}`);
 
         await marketplaceContract.methods.buyToken(listingId).send({
-          callValue: tronWeb.toSun(totalPrice)
+            callValue: tronWeb.toSun(totalPrice)
         });
 
         alert('Token purchased successfully!');
         fetchMarketplaceListings();
-      } catch (error) {
+    } catch (error) {
         console.error('Error buying token:', error);
         alert('Failed to buy tokens.');
-      }
     }
+}
 
-    async function cancelListing(listingId) {
-      try {
+async function cancelListing(listingId) {
+    try {
         await marketplaceContract.methods.cancelListing(listingId).send();
         alert('Listing cancelled successfully!');
         fetchMarketplaceListings();
-      } catch (error) {
+    } catch (error) {
         console.error('Error cancelling listing:', error);
         alert('Failed to cancel listing.');
-      }
     }
+}
+
 
     async function connectWallet() {
       if (await checkTronLinkInstalled()) {
