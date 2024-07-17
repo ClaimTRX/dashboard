@@ -1293,7 +1293,7 @@ The energy costs are:<br>
             if (listing.isActive) {
                 const tokenAmount = tronWeb.fromSun(listing.tokenAmount);
                 const totalPrice = tronWeb.fromSun(listing.priceInTRX);
-                const isSeller = listing.seller.toLowerCase() === userAddress.toLowerCase();
+                const isSeller = listing.seller.trim().toLowerCase() === userAddress.trim().toLowerCase();
 
                 const listingElement = document.createElement('div');
                 listingElement.className = 'listing';
