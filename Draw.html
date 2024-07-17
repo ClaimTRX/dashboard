@@ -1037,7 +1037,7 @@
         const balance = await tronWeb.trx.getBalance(userAddress);
         console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-        trc20DrawContract = await tronWeb.contract(trc20DrawContractAbi, trc20DrawContractAddress);
+        trc20DrawContract = await tronWeb.contract().at(trc20DrawContractAddress);
         cftTokenContract = await tronWeb.contract(cftTokenContractAbi, cftTokenAddress);
 
         updateUI();
@@ -1047,15 +1047,14 @@
     }
 
     async function updateUI() {
-  try {
-    await checkCFTTokenBalance();
-    await checkRegistrationStatus(userAddress);
-    startDataUpdates();
-  } catch (error) {
-    console.error('Error updating UI:', error);
-  }
-}
-
+      try {
+        await checkCFTTokenBalance();
+        await checkRegistrationStatus(userAddress);
+        startDataUpdates();
+      } catch (error) {
+        console.error('Error updating UI:', error);
+      }
+    }
 
     async function checkCFTTokenBalance() {
       try {
@@ -1073,28 +1072,23 @@
     }
 
     async function checkRegistrationStatus(walletAddress) {
-  try {
-    // Call the mapping as a function
-    const isRegistered = await trc20DrawContract.methods.hasRegistered(walletAddress).call();
-    const registerButton = document.getElementById('register-button');
-    if (isRegistered) {
-      document.getElementById('statusMessage').textContent = 'You are already registered for this draw.';
-      document.getElementById('statusMessage').classList.remove('hidden');
-      registerButton.textContent = 'Already Registered';
-      registerButton.disabled = true;
-    } else {
-      document.getElementById('statusMessage').textContent = '';
-      document.getElementById('statusMessage').classList.add('hidden');
-      registerButton.textContent = 'Register';
-      registerButton.disabled = false;
+      try {
+        // Call the mapping as a function
+        const isRegistered = await trc20DrawContract.hasRegistered(walletAddress).call();
+        const registerButton = document.getElementById('register-button');
+        if (isRegistered) {
+          registerButton.textContent = 'Registered';
+          registerButton.disabled = true;
+        } else {
+          registerButton.textContent = 'Register';
+          registerButton.disabled = false;
+        }
+      } catch (error) {
+        console.error('Registration Status Error: ', error.message);
+        document.getElementById('statusMessage').textContent = 'Error checking registration status: ' + error.message;
+        document.getElementById('statusMessage').classList.remove('hidden');
+      }
     }
-  } catch (error) {
-    console.error('Registration Status Error: ', error.message);
-    document.getElementById('statusMessage').textContent = 'Error checking registration status: ' + error.message;
-    document.getElementById('statusMessage').classList.remove('hidden');
-  }
-}
-
 
     async function startDataUpdates() {
       setInterval(() => {
@@ -1105,8 +1099,8 @@
 
     async function updateTimer() {
       try {
-        const lastDrawTime = parseInt(await trc20DrawContract.methods.lastDrawTime().call());
-        const interval = parseInt(await trc20DrawContract.methods.interval().call());
+        const lastDrawTime = parseInt(await trc20DrawContract.lastDrawTime().call());
+        const interval = parseInt(await trc20DrawContract.interval().call());
         const currentTime = Math.floor(Date.now() / 1000);
         const timeLeft = lastDrawTime + interval - currentTime;
 
@@ -1129,7 +1123,7 @@
 
     document.getElementById('register-button').addEventListener('click', async () => {
       try {
-        await trc20DrawContract.methods.register().send();
+        await trc20DrawContract.register().send();
         alert('Registered successfully!');
         updateUI();
       } catch (error) {
@@ -1140,7 +1134,7 @@
 
     document.getElementById('draw-button').addEventListener('click', async () => {
       try {
-        await trc20DrawContract.methods.draw().send();
+        await trc20DrawContract.draw().send();
         alert('Draw executed successfully!');
         updateUI();
       } catch (error) {
