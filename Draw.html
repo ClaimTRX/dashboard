@@ -1075,7 +1075,7 @@
     async function checkRegistrationStatus(walletAddress) {
   try {
     // Call the mapping as a function
-    const isRegistered = await trc20DrawContract.methods.hasRegistered(walletAddress).call();
+    const isRegistered = await contract.hasRegistered(walletAddress).call();
     const registerButton = document.getElementById('register-button');
     if (isRegistered) {
       document.getElementById('statusMessage').textContent = 'You are already registered for this draw.';
