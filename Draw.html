@@ -663,20 +663,25 @@
     }
 
     async function updateUI(balance) {
-      try {
-        await updateAvailableTRC20();
-        await checkCFTTokenBalance();
-        startDataUpdates();
-      } catch (error) {
-        console.error('Error updating UI:', error);
-      }
-    }
+  try {
+    await updateAvailableTRC20();
+    await checkCFTTokenBalance();
+    startDataUpdates();
+  } catch (error) {
+    console.error('Error updating UI:', error);
+  }
+}
+
 
     async function updateAvailableTRC20() {
-      const availableTRC20 = await trc20DrawContract.methods.balanceOf(userAddress).call();
-      const tokenName = await trc20DrawContract.methods.name().call();
-      document.getElementById('available-trc20').innerText = `Available TRC20: ${formatNumber(tronWeb.fromSun(availableTRC20))} ${tokenName}`;
-    }
+  const prizeTokenAddress = await trc20DrawContract.methods.prizeToken().call();
+  const prizeTokenContract = await tronWeb.contract(cftTokenContractAbi, prizeTokenAddress);
+  const tokenName = await prizeTokenContract.methods.name().call();
+  const prizeAmount = await trc20DrawContract.methods.prizeAmount().call();
+  const decimals = await prizeTokenContract.methods.decimals().call();
+  document.getElementById('prizeAmount').innerText = `Current prize: ${formatNumber(prizeAmount / (10 ** decimals))} ${tokenName}`;
+}
+
 
     async function checkCFTTokenBalance() {
       try {
@@ -696,35 +701,37 @@
     }
 
     async function startDataUpdates() {
-      setInterval(() => {
-        updateTimer();
-        updatePrizeAmount();
-      }, 1000);
-    }
+  setInterval(() => {
+    updateTimer();
+    updateAvailableTRC20();
+  }, 1000);
+}
+
 
     async function updateTimer() {
-      try {
-        const lastDrawTime = parseInt(await trc20DrawContract.methods.lastDrawTime().call());
-        const interval = parseInt(await trc20DrawContract.methods.interval().call());
-        const currentTime = Math.floor(Date.now() / 1000);
-        const timeLeft = lastDrawTime + interval - currentTime;
+  try {
+    const lastDrawTime = parseInt(await trc20DrawContract.methods.lastDrawTime().call());
+    const interval = parseInt(await trc20DrawContract.methods.interval().call());
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeLeft = lastDrawTime + interval - currentTime;
 
-        const hours = Math.floor(timeLeft / 3600);
-        const minutes = Math.floor((timeLeft % 3600) / 60);
-        const seconds = timeLeft % 60;
+    const hours = Math.floor(timeLeft / 3600);
+    const minutes = Math.floor((timeLeft % 3600) / 60);
+    const seconds = timeLeft % 60;
 
-        const timerDisplay = document.getElementById('timer');
-        if (timeLeft > 0) {
-          timerDisplay.innerText = `Next draw in: ${hours}:${minutes}:${seconds}`;
-          document.getElementById('draw-button').disabled = true;
-        } else {
-          timerDisplay.innerText = "Draw is available!";
-          document.getElementById('draw-button').disabled = false;
-        }
-      } catch (error) {
-        console.error('Error updating timer:', error);
-      }
+    const timerDisplay = document.getElementById('timer');
+    if (timeLeft > 0) {
+      timerDisplay.innerText = `Next draw in: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('draw-button').disabled = true;
+    } else {
+      timerDisplay.innerText = "Draw is available!";
+      document.getElementById('draw-button').disabled = false;
     }
+  } catch (error) {
+    console.error('Error updating timer:', error);
+  }
+}
+
 
     async function updatePrizeAmount() {
       try {
