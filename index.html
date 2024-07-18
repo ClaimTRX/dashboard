@@ -166,45 +166,47 @@
     }
 
     @media (max-width: 767.98px) {
-      .sidebar {
-        height: auto;
-        padding: 10px;
-        width: 100%;
-        position: relative;
-      }
+  .sidebar {
+    height: auto;
+    padding: 10px;
+    width: 100%;
+    position: relative;
+  }
 
-      .topbar {
-        text-align: center;
-        margin-left: 0;
-      }
+  .topbar {
+    text-align: center; /* Center text on mobile devices */
+    margin-left: 0;
+  }
 
-      .main-content {
-        margin-left: 0;
-      }
+  .main-content {
+    margin-left: 0;
+  }
 
-      .card-title {
-        font-size: 1.25rem;
-      }
+  .card-title {
+    font-size: 1.25rem;
+  }
 
-      .card-text {
-        font-size: 0.875rem;
-      }
+  .card-text {
+    font-size: 0.875rem;
+  }
 
-      .btn-success, .btn-danger, .btn-primary {
-        font-size: 0.75rem;
-        padding: 6px 12px;
-        width: 100%; /* Adjust width for mobile */
-      }
+  .btn-success, .btn-danger, .btn-primary {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    width: 100%; /* Adjust width for mobile */
+  }
 
-      .form-control {
-        font-size: 0.75rem;
-        padding: 6px;
-        width: 100%; /* Adjust width for mobile */
-      }
+  .form-control {
+    font-size: 0.75rem;
+    padding: 6px;
+    width: 100%; /* Adjust width for mobile */
+  }
 
-      .card-explanation {
-        margin-top: 20px;
-      }
+  .card-explanation {
+    margin-top: 20px;
+  }
+
+
     }
   </style>
 </head>
@@ -1105,8 +1107,7 @@ async function initializeTronWeb() {
     tronWeb = window.tronWeb;
     userAddress = tronWeb.defaultAddress.base58;
 
-    document.getElementById('connect-button').innerText = 'Connected';
-    document.getElementById('connect-button').disabled = true;
+    document.getElementById('connect-button').style.display = 'none'; // Hide the button
 
     console.log('Connected to TronLink.');
     console.log('User Address:', userAddress);
@@ -1126,6 +1127,7 @@ async function initializeTronWeb() {
         console.error('Error fetching balance:', error);
     }
 }
+
 
 async function updateUI(balance) {
     try {
