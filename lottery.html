@@ -18,21 +18,48 @@
             padding: 15px;
             position: fixed;
             width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .sidebar a {
             color: #fff;
             text-decoration: none;
             display: block;
             padding: 10px 0;
+            width: 100%;
+            text-align: center;
         }
         .sidebar a:hover {
             background-color: #1f4068;
+        }
+        .sidebar .social-links {
+            display: flex;
+            margin-top: 20px;
+        }
+        .sidebar .social-icon {
+            color: white;
+            font-size: 20px;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        .sidebar .social-icon:last-child {
+            margin-right: 0;
         }
         .topbar {
             background-color: #162447;
             padding: 10px;
             text-align: right;
             margin-left: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .topbar a.social-icon {
+            color: white;
+            margin-left: 15px;
+            font-size: 20px;
+            text-decoration: none;
         }
         .topbar button {
             background-color: #4CAF50;
@@ -65,7 +92,9 @@
         .card-text {
             font-size: 1rem;
         }
-        .btn-success, .btn-danger, .btn-primary {
+        .btn-success,
+        .btn-danger,
+        .btn-primary {
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -119,10 +148,13 @@
                 padding: 10px;
                 width: 100%;
                 position: relative;
+                flex-direction: column;
+                align-items: center;
             }
             .topbar {
                 text-align: center;
                 margin-left: 0;
+                justify-content: center;
             }
             .main-content {
                 margin-left: 0;
@@ -133,7 +165,9 @@
             .card-text {
                 font-size: 0.875rem;
             }
-            .btn-success, .btn-danger, .btn-primary {
+            .btn-success,
+            .btn-danger,
+            .btn-primary {
                 font-size: 0.75rem;
                 padding: 6px 12px;
                 width: 100%;
@@ -145,6 +179,12 @@
             }
             .card-explanation {
                 margin-top: 20px;
+            }
+            .sidebar .social-links {
+                justify-content: center;
+            }
+            .sidebar .social-icon {
+                margin-bottom: 10px;
             }
         }
     </style>
@@ -316,7 +356,7 @@
             }
         ];
 
-        async function connectWallet() {
+       async function connectWallet() {
             try {
                 if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
                     tronWeb = window.tronWeb;
@@ -340,32 +380,16 @@
                 console.log('Tickets Sold:', ticketsSold);
                 console.log('Prize Amount:', prizeAmount);
 
-                const ticketsSoldElement = document.getElementById('ticketsSold');
-                const prizeAmountElement = document.getElementById('prizeAmount');
+                document.getElementById('ticketsSold').innerText = `Tickets sold: ${ticketsSold}`;
+                document.getElementById('prizeAmount').innerText = `Current prize: ${tronWeb.fromSun(prizeAmount)} TRX`;
+
                 const drawButton = document.getElementById('drawButton');
-
-                if (ticketsSoldElement) {
-                    ticketsSoldElement.innerText = `Tickets sold: ${ticketsSold}`;
+                if (ticketsSold >= 25) {
+                    drawButton.disabled = false;
+                    drawButton.classList.remove('disabled');
                 } else {
-                    console.error('ticketsSold element not found');
-                }
-
-                if (prizeAmountElement) {
-                    prizeAmountElement.innerText = `Current prize: ${tronWeb.fromSun(prizeAmount)} TRX`;
-                } else {
-                    console.error('prizeAmount element not found');
-                }
-
-                if (drawButton) {
-                    if (ticketsSold >= 25) {
-                        drawButton.disabled = false;
-                        drawButton.classList.remove('disabled');
-                    } else {
-                        drawButton.disabled = true;
-                        drawButton.classList.add('disabled');
-                    }
-                } else {
-                    console.error('drawButton element not found');
+                    drawButton.disabled = true;
+                    drawButton.classList.add('disabled');
                 }
             } catch (error) {
                 console.error('Error updating UI:', error);
@@ -375,12 +399,7 @@
         async function updateTicketCount(account) {
             try {
                 const ticketsCount = await contract.methods.getTickets(account).call();
-                const ticketsCountElement = document.getElementById('ticketsCount');
-                if (ticketsCountElement) {
-                    ticketsCountElement.innerText = `Your tickets: ${ticketsCount}`;
-                } else {
-                    console.error('ticketsCount element not found');
-                }
+                document.getElementById('ticketsCount').innerText = `Your tickets: ${ticketsCount}`;
             } catch (error) {
                 console.error('Error getting ticket count:', error);
             }
@@ -416,6 +435,14 @@
             }
         }
 
+        function switchLanguage(language) {
+            if (language === 'zh') {
+                window.location.href = 'lottery_zh.html';
+            } else {
+                window.location.href = 'lottery.html';
+            }
+        }
+
         window.addEventListener('load', () => {
             document.getElementById('connectWallet').addEventListener('click', connectWallet);
             document.getElementById('buyTicketsForm').addEventListener('submit', (event) => {
@@ -433,6 +460,17 @@
         <a href="lottery.html">Lottery</a>
         <a href="draw.html">Draw</a>
         <a href="claim.html">Claim</a>
+        <div class="social-links">
+            <a href="https://x.com/cfttrc20?s=21" target="_blank" class="social-icon">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="https://t.me/claimfreetrxnow" target="_blank" class="social-icon">
+                <i class="fab fa-telegram-plane"></i>
+            </a>
+        </div>
+        <div class="language-switcher">
+            <button id="language-switcher" class="btn btn-secondary" onclick="switchLanguage('zh')">中文</button>
+        </div>
     </div>
     <div class="topbar">
         <button id="connectWallet">Connect Wallet</button>
