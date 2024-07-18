@@ -1318,14 +1318,23 @@ function setupEventListeners() {
 
 async function stakeTokens(amount) {
     const amountToStake = tronWeb.toSun(amount);
+    const amountToApprove = amountToStake + tronWeb.toSun(1); // Adding 1 TRX to the amount to approve
 
-    // Always perform the approval transaction for the max amount
-    await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
+    try {
+        // Always approve the amount being staked plus one
+        await tokenContract.methods.approve(stakingContractAddress, amountToApprove).send();
 
-    await stakingContract.methods.stake(amountToStake).send();
-    const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
-    document.getElementById('staked-amount').innerText = formatWholeNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
+        // Then stake the desired amount
+        await stakingContract.methods.stake(amountToStake).send();
+
+        // Fetch and display the new staked amount
+        const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
+        document.getElementById('staked-amount').innerText = formatWholeNumber(tronWeb.fromSun(newStakedAmount)) + ' CFT';
+    } catch (error) {
+        console.error('Error staking tokens:', error);
+    }
 }
+
 
 async function unstakeTokens() {
     const unstakeAmount = document.getElementById('stake-amount').value;
