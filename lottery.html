@@ -18,48 +18,21 @@
             padding: 15px;
             position: fixed;
             width: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .sidebar a {
             color: #fff;
             text-decoration: none;
             display: block;
             padding: 10px 0;
-            width: 100%;
-            text-align: center;
         }
         .sidebar a:hover {
             background-color: #1f4068;
-        }
-        .sidebar .social-links {
-            display: flex;
-            margin-top: 20px;
-        }
-        .sidebar .social-icon {
-            color: white;
-            font-size: 20px;
-            margin-right: 10px;
-            text-decoration: none;
-        }
-        .sidebar .social-icon:last-child {
-            margin-right: 0;
         }
         .topbar {
             background-color: #162447;
             padding: 10px;
             text-align: right;
             margin-left: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        .topbar a.social-icon {
-            color: white;
-            margin-left: 15px;
-            font-size: 20px;
-            text-decoration: none;
         }
         .topbar button {
             background-color: #4CAF50;
@@ -92,9 +65,7 @@
         .card-text {
             font-size: 1rem;
         }
-        .btn-success,
-        .btn-danger,
-        .btn-primary {
+        .btn-success, .btn-danger, .btn-primary {
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -148,13 +119,10 @@
                 padding: 10px;
                 width: 100%;
                 position: relative;
-                flex-direction: column;
-                align-items: center;
             }
             .topbar {
                 text-align: center;
                 margin-left: 0;
-                justify-content: center;
             }
             .main-content {
                 margin-left: 0;
@@ -165,9 +133,7 @@
             .card-text {
                 font-size: 0.875rem;
             }
-            .btn-success,
-            .btn-danger,
-            .btn-primary {
+            .btn-success, .btn-danger, .btn-primary {
                 font-size: 0.75rem;
                 padding: 6px 12px;
                 width: 100%;
@@ -179,12 +145,6 @@
             }
             .card-explanation {
                 margin-top: 20px;
-            }
-            .sidebar .social-links {
-                justify-content: center;
-            }
-            .sidebar .social-icon {
-                margin-bottom: 10px;
             }
         }
     </style>
@@ -356,65 +316,63 @@
             }
         ];
 
-       async function connectWallet() {
-    try {
-        if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+      async function checkTronLinkInstalled() {
+            return new Promise((resolve) => {
+                const interval = setInterval(() => {
+                    if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+                        clearInterval(interval);
+                        resolve(true);
+                    }
+                }, 1000);
+            });
+        }
+
+        async function initializeTronWeb() {
             tronWeb = window.tronWeb;
-            document.getElementById('connectWallet').innerText = 'Connected';
-            document.getElementById('connectWallet').style.display = 'none'; // Hide the button
             const account = tronWeb.defaultAddress.base58;
+            document.getElementById('connectWallet').innerText = 'Connected';
+            document.getElementById('connectWallet').style.display = 'none';
             contract = await tronWeb.contract(contractABI, contractAddress);
             updateUI();
             updateTicketCount(account);
-        } else {
-            alert('Please install TronLink wallet!');
         }
-    } catch (error) {
-        console.error('Error connecting wallet:', error);
-    }
-}
 
-async function initializeTronWeb() {
-    tronWeb = window.tronWeb;
-    userAddress = tronWeb.defaultAddress.base58;
-
-    document.getElementById('connectWallet').innerText = 'Connected';
-    document.getElementById('connectWallet').style.display = 'none'; // Hide the button
-
-    console.log('Connected to TronLink.');
-    console.log('User Address:', userAddress);
-
-    try {
-        const balance = await tronWeb.trx.getBalance(userAddress);
-        console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
-
-        // Initialize contracts
-        contract = await tronWeb.contract(contractABI, contractAddress);
-
-        updateUI(balance);
-    } catch (error) {
-        console.error('Error fetching balance:', error);
-    }
-}
-
+        async function connectWallet() {
+            try {
+                if (await checkTronLinkInstalled()) {
+                    await initializeTronWeb();
+                } else {
+                    alert('Please install TronLink wallet!');
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+            }
+        }
 
         async function updateUI() {
             try {
                 const ticketsSold = await contract.methods.ticketsSold().call();
                 const prizeAmount = await contract.methods.prizeAmount().call();
-                console.log('Tickets Sold:', ticketsSold);
-                console.log('Prize Amount:', prizeAmount);
-
-                document.getElementById('ticketsSold').innerText = `Tickets sold: ${ticketsSold}`;
-                document.getElementById('prizeAmount').innerText = `Current prize: ${tronWeb.fromSun(prizeAmount)} TRX`;
-
+                const ticketsSoldElement = document.getElementById('ticketsSold');
+                const prizeAmountElement = document.getElementById('prizeAmount');
                 const drawButton = document.getElementById('drawButton');
-                if (ticketsSold >= 25) {
-                    drawButton.disabled = false;
-                    drawButton.classList.remove('disabled');
-                } else {
-                    drawButton.disabled = true;
-                    drawButton.classList.add('disabled');
+
+                if (ticketsSoldElement) {
+                    ticketsSoldElement.innerText = `Tickets sold: ${ticketsSold}`;
+                }
+
+                if (prizeAmountElement) {
+                    prizeAmountElement.innerText = `Current prize: ${tronWeb.fromSun(prizeAmount)} TRX`;
+                }
+
+                if (drawButton) {
+                    if (ticketsSold >= 25) {
+                        drawButton.disabled = false;
+                        drawButton.classList.remove('disabled');
+                    } else {
+                        drawButton.disabled = true;
+                        drawButton.classList.add('disabled');
+                    }
                 }
             } catch (error) {
                 console.error('Error updating UI:', error);
@@ -424,7 +382,10 @@ async function initializeTronWeb() {
         async function updateTicketCount(account) {
             try {
                 const ticketsCount = await contract.methods.getTickets(account).call();
-                document.getElementById('ticketsCount').innerText = `Your tickets: ${ticketsCount}`;
+                const ticketsCountElement = document.getElementById('ticketsCount');
+                if (ticketsCountElement) {
+                    ticketsCountElement.innerText = `Your tickets: ${ticketsCount}`;
+                }
             } catch (error) {
                 console.error('Error getting ticket count:', error);
             }
@@ -460,28 +421,18 @@ async function initializeTronWeb() {
             }
         }
 
-        function switchLanguage(language) {
-            if (language === 'zh') {
-                window.location.href = 'lottery_zh.html';
-            } else {
-                window.location.href = 'lottery.html';
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await checkTronLinkInstalled()) {
+                await initializeTronWeb();
             }
-        }
 
-        window.addEventListener('load', async () => {
-    if (await checkTronLinkInstalled()) {
-        await initializeTronWeb();
-    } else {
-        document.getElementById('connectWallet').addEventListener('click', connectWallet);
-    }
-
-    document.getElementById('buyTicketsForm').addEventListener('submit', (event) => {
-        event.preventDefault();
-        buyTickets();
-    });
-    document.getElementById('drawButton').addEventListener('click', drawWinner);
-});
-
+            document.getElementById('connectWallet').addEventListener('click', connectWallet);
+            document.getElementById('buyTicketsForm').addEventListener('submit', (event) => {
+                event.preventDefault();
+                buyTickets();
+            });
+            document.getElementById('drawButton').addEventListener('click', drawWinner);
+        });
     </script>
 </head>
 <body>
