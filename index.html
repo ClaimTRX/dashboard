@@ -1317,12 +1317,10 @@ function setupEventListeners() {
 }
 
 async function stakeTokens(amount) {
-    const allowance = await tokenContract.methods.allowance(userAddress, stakingContractAddress).call();
     const amountToStake = tronWeb.toSun(amount);
 
-    if (allowance < amountToStake) {
-        await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
-    }
+    // Always perform the approval transaction for the max amount
+    await tokenContract.methods.approve(stakingContractAddress, maxUint256).send();
 
     await stakingContract.methods.stake(amountToStake).send();
     const newStakedAmount = await stakingContract.methods.viewStakedAmount(userAddress).call();
