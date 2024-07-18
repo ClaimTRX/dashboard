@@ -404,7 +404,8 @@ input[type=number]::-webkit-inner-spin-button {
     tronWeb = window.tronWeb;
     userAddress = tronWeb.defaultAddress.base58;
 
-    document.getElementById('connect-button').style.display = 'none'; // Hide the button
+    // Hide the connect button
+    document.getElementById('connect-button').style.display = 'none';
 
     console.log('Connected to TronLink.');
     console.log('User Address:', userAddress);
@@ -413,17 +414,14 @@ input[type=number]::-webkit-inner-spin-button {
         const balance = await tronWeb.trx.getBalance(userAddress);
         console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-        // Initialize contracts
-        stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
-        tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
-        buyCftContract = await tronWeb.contract(buyCftContractAbi, buyCftContractAddress);
-        marketplaceContract = await tronWeb.contract(marketplaceContractAbi, marketplaceContractAddress);
+        contract = await tronWeb.contract(contractABI, contractAddress);
 
         updateUI(balance);
     } catch (error) {
         console.error('Error fetching balance:', error);
     }
 }
+
 
 
         async function updateUI(balance) {
