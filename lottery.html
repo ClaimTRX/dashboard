@@ -190,18 +190,23 @@
             }
 
             .btn-success,
-            .btn-danger,
-            .btn-primary {
-                font-size: 0.75rem;
-                padding: 6px 12px;
-                width: 100%;
-            }
+.btn-danger,
+.btn-primary {
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    padding: 8px 16px;
+    margin-top: 10px;
+}
 
-            .form-control {
-                font-size: 0.75rem;
-                padding: 6px;
-                width: 100%;
-            }
+.form-control {
+    padding: 8px;
+    font-size: 0.875rem;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
 
             .card-explanation {
                 margin-top: 20px;
@@ -534,10 +539,13 @@
                     <div id="lotteryWarningMessage" class="card-text" style="color: red; display: none;">To participate, please have 10 TRX unstaked in your wallet.</div>
                     <div id="lotteryStatusMessage" class="card-text hidden" style="color: green;"></div>
                     <form id="buyTicketsForm">
-                        <input type="number" id="ticketAmount" min="1" required placeholder="Amount of tickets"><br>
-                        <button type="submit" class="btn btn-success">Buy Tickets</button>
+                        <input type="number" id="ticketAmount" min="1" required class="form-control" placeholder="Amount of tickets">
+
+                        
                     </form>
-                    <button id="drawButton" class="btn btn-primary disabled" disabled>Draw Winner</button>
+                    <button type="submit" class="btn btn-success">Buy Tickets</button><br>
+<button id="drawButton" class="btn btn-primary disabled" disabled>Draw Winner</button><br>
+
                     <div id="prizeAmount">Current prize: 0 TRX</div>
                     <div id="ticketsSold">Tickets sold: 0</div>
                     <div id="ticketsCount">Your tickets: 0</div>
