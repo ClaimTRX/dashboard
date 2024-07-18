@@ -32,11 +32,21 @@
     }
 
     .topbar {
-      background-color: #162447;
-      padding: 10px;
-      text-align: right;
-      margin-left: 200px;
-    }
+    background-color: #162447;
+    padding: 10px;
+    text-align: right;
+    margin-left: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+    .topbar a.social-icon {
+    color: white;
+    margin-left: 15px;
+    font-size: 20px;
+    text-decoration: none;
+}
 
     .topbar button {
       background-color: #4CAF50;
@@ -166,46 +176,46 @@
     }
 
     @media (max-width: 767.98px) {
-  .sidebar {
-     text-align: center; /* Center text on mobile devices */
-    height: auto;
-    padding: 10px;
-    width: 100%;
-    position: relative;
-  }
+    .sidebar {
+        height: auto;
+        padding: 10px;
+        width: 100%;
+        position: relative;
+    }
 
-  .topbar {
-     text-align: center; /* Center text on mobile devices */
-    margin-left: 0;
-  }
+    .topbar {
+        text-align: center; /* Center text on mobile devices */
+        margin-left: 0;
+        justify-content: center;
+    }
 
-  .main-content {
-    margin-left: 0;
-  }
+    .main-content {
+        margin-left: 0;
+    }
 
-  .card-title {
-    font-size: 1.25rem;
-  }
+    .card-title {
+        font-size: 1.25rem;
+    }
 
-  .card-text {
-    font-size: 0.875rem;
-  }
+    .card-text {
+        font-size: 0.875rem;
+    }
 
-  .btn-success, .btn-danger, .btn-primary {
-    font-size: 0.75rem;
-    padding: 6px 12px;
-    width: 100%; /* Adjust width for mobile */
-  }
+    .btn-success, .btn-danger, .btn-primary {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        width: 100%; /* Adjust width for mobile */
+    }
 
-  .form-control {
-    font-size: 0.75rem;
-    padding: 6px;
-    width: 100%; /* Adjust width for mobile */
-  }
+    .form-control {
+        font-size: 0.75rem;
+        padding: 6px;
+        width: 100%; /* Adjust width for mobile */
+    }
 
-  .card-explanation {
-    margin-top: 20px;
-  }
+    .card-explanation {
+        margin-top: 20px;
+    }
 
 
     }
