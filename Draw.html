@@ -1317,28 +1317,30 @@ async function checkTronLinkInstalled() {
 }
 
 async function initializeTronWeb() {
-  tronWeb = window.tronWeb;
-  userAddress = tronWeb.defaultAddress.base58;
+    tronWeb = window.tronWeb;
+    userAddress = tronWeb.defaultAddress.base58;
 
-  document.getElementById('connect-button').innerText = 'Connected';
-  document.getElementById('connect-button').disabled = true;
+    document.getElementById('connect-button').style.display = 'none'; // Hide the button
 
-  console.log('Connected to TronLink.');
-  console.log('User Address:', userAddress);
+    console.log('Connected to TronLink.');
+    console.log('User Address:', userAddress);
 
-  try {
-    const balance = await tronWeb.trx.getBalance(userAddress);
-    console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
+    try {
+        const balance = await tronWeb.trx.getBalance(userAddress);
+        console.log('Balance:', tronWeb.fromSun(balance), 'TRX');
 
-    trc20DrawContract = await tronWeb.contract().at(trc20DrawContractAddress);
-    trxDrawContract = await tronWeb.contract().at(trxDrawContractAddress);
-    cftTokenContract = await tronWeb.contract(cftTokenContractAbi, cftTokenAddress);
+        // Initialize contracts
+        stakingContract = await tronWeb.contract(stakingContractAbi, stakingContractAddress);
+        tokenContract = await tronWeb.contract(tokenContractAbi, tokenContractAddress);
+        buyCftContract = await tronWeb.contract(buyCftContractAbi, buyCftContractAddress);
+        marketplaceContract = await tronWeb.contract(marketplaceContractAbi, marketplaceContractAddress);
 
-    updateUI();
-  } catch (error) {
-    console.error('Error fetching balance:', error);
-  }
+        updateUI(balance);
+    } catch (error) {
+        console.error('Error fetching balance:', error);
+    }
 }
+
 
 async function updateUI() {
   try {
