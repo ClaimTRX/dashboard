@@ -1170,9 +1170,14 @@ async function updateAvailableCFT() {
 }
 
 async function updateTotalBuyCFT() {
-    const totalBuyCFT = await buyCftContract.methods.viewTotalCFTTokens().call(); // Assuming `viewTotalCFTTokens` is the function in the smart contract that returns the total tokens
-    document.getElementById('total-buy-cft').innerText = formatWholeNumber(tronWeb.fromSun(totalBuyCFT)) + ' CFT';
+    try {
+        const totalBuyCFT = await tokenContract.methods.balanceOf(buyCftContractAddress).call();
+        document.getElementById('total-buy-cft').innerText = formatWholeNumber(tronWeb.fromSun(totalBuyCFT)) + ' CFT';
+    } catch (error) {
+        console.error('Error fetching total CFT tokens in buy contract:', error);
+    }
 }
+
 
 function updateAvailableTRX(balance) {
     document.getElementById('available-trx').innerText = 'Available TRX: ' + formatWholeNumber(tronWeb.fromSun(balance)) + ' TRX';
