@@ -330,14 +330,18 @@
           <h5 class="card-title">Buy CFT</h5>
           <p class="card-text">Current CFT Price: 1 TRX</p>
           <p class="card-text" id="available-trx">Loading...</p>
-          <h5 class="card-title mt-3">Total CFT Tokens in Buy Contract</h5>
+          <h5 class="card-title mt-3">CFT Tokens left at 1 TRX Price</h5>
 <p class="card-text" id="total-buy-cft">Loading...</p>
 
           <input type="number" id="buy-amount" class="form-control" placeholder="Enter amount to buy">
           <button id="buy-button" class="btn btn-primary">Buy CFT</button>
         </div>
         <div class="card-explanation">
-          <p>This card shows the current price of CFT tokens in TRX and the amount of TRX you have available. Enter the amount of CFT tokens you want to buy and click the "Buy CFT" button.</p>
+          <p>To buy our ecosystem token CFT you enter the amount of CFT tokens you want to buy and click the "Buy CFT" button.</p>
+          <p>CFT Token can be staked for TRX rewards or used to interact with ecosystem functions.</p>
+          <p>All TRX from CFT Sale is sent to our Treasury and used to generate income for our ecosystem</p>
+          <p>For each million token sold the price increase with 0.1 and "Tokens Left indicate the amount left at current price.</p>
+          <p>CFT is not yet listed, but can be traded on our Marketplace</p>
         </div>
       </div>
     </div>
@@ -346,13 +350,15 @@
   <div class="card-body">
     <div class="card-text-section">
       <h5 class="card-title">Marketplace</h5>
-      <p class="card-text">List or Buy CFT Tokens</p>
+      <p class="card-text">List your CFT Tokens</p>
       <input type="number" id="tokenAmount" class="form-control" placeholder="Amount of Tokens">
       <input type="number" id="pricePerTokenInTRX" class="form-control" placeholder="Total price in TRX">
       <button id="approveAndListButton" class="btn btn-success">Approve and List</button>
     </div>
     <div class="card-explanation">
-      <p>Approve the tokens you want to list on the marketplace. Once approved, you can list them for sale at your desired price per token.</p>
+      <p>To ensure users can trade their token the ecossytem tresasury will buy back any listed tokens that are not traded P2P within a resonable timeframe<br>
+      This only happen if the tokens are listed at the same price the seller bought them at.</p>
+      <p>Orders can not be filled partially, so keep this in mind when listing your tokens. </p>
     </div>
   </div>
 </div>
@@ -361,11 +367,12 @@
 <div class="card mt-4">
   <div class="card-body">
     <div class="card-text-section">
-      <h5 class="card-title">Listed for Sale</h5>
+      <h5 class="card-title">Listed tokens</h5>
       <div id="listings" class="card-text">Loading...</div>
     </div>
     <div class="card-explanation">
-      <p>Approve the tokens you want to list on the marketplace. Once approved, you can list them for sale at your desired price per token.</p>
+      <p>Listed tokens will appear here. when there are tokens listed for sale at or below marketprice we will close the buy option to ensure users who want to buy CFT<br>
+      will buy them from the Marketplace</p>
     </div>
   </div>
 </div>
